@@ -17,22 +17,22 @@ class PlayComputerScene(
 
     private var newGameLayoutComputer: View? = null
     private var buttonPlayComputerEasy: Button? = null
-    private var buttonPlayComputerDifficult: Button? = null
+    private var buttonPlayComputerHard: Button? = null
 
     override fun initScene() {
-        newGameLayoutComputer = layoutInflater.inflate(R.layout.layout_new_game_computer, null)
+        newGameLayoutComputer = layoutInflater.inflate(R.layout.layout_play_computer, null)
         addChildInMainLayout(newGameLayoutComputer!!)
         fadeIn()
-        buttonPlayComputerEasy = newGameLayoutComputer?.findViewById(R.id.newGameButtonComputer)
-        buttonPlayComputerDifficult = newGameLayoutComputer?.findViewById(R.id.newGameButtonHuman)
+        buttonPlayComputerEasy = newGameLayoutComputer?.findViewById(R.id.newGameButtonComputerEasy)
+        buttonPlayComputerHard = newGameLayoutComputer?.findViewById(R.id.newGameButtonComputerHard)
 
         buttonPlayComputerEasy?.setOnClickListener {
             fadeOut()
             listener.onEasyClicked()
         }
-        buttonPlayComputerDifficult?.setOnClickListener {
+        buttonPlayComputerHard?.setOnClickListener {
             fadeOut()
-            listener.onDifficultClick()
+            listener.onHardClicked()
         }
 
     }
@@ -75,7 +75,7 @@ class PlayComputerScene(
 
     interface PlayComputerButtonClickListener {
         fun onEasyClicked()
-        fun onDifficultClick()
+        fun onHardClicked()
     }
 
 }

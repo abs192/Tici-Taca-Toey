@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/newGameLayout"
+    android:id="@+id/newGameLayoutComputer"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_centerInParent="true"
@@ -16,10 +16,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:text="Play vs"
+        android:text="Difficulty"
         android:textColor="#EEE"
         android:textSize="30dp"
-        android:textStyle="bold" />
+        android:textStyle="bold"  />
 
     <LinearLayout
         android:layout_width="wrap_content"
@@ -28,21 +28,21 @@
         android:orientation="horizontal">
 
         <Button
-            android:id="@+id/newGameButtonComputer"
+            android:id="@+id/newGameButtonComputerEasy"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
             android:background="@drawable/button_background"
-            android:text="Computer"
+            android:text="Easy"
             android:textColor="#EEE" />
 
         <Button
-            android:id="@+id/newGameButtonHuman"
+            android:id="@+id/newGameButtonComputerHard"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
             android:background="@drawable/button_background"
-            android:text="Human"
+            android:text="Hard"
             android:textColor="#EEE" />
     </LinearLayout>
 </LinearLayout>

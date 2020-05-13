@@ -7,12 +7,11 @@ import android.view.Window
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
+import com.abs192.ticitacatoey.types.GameInfo
 import com.abs192.ticitacatoey.views.AnimatorUtil
 import com.abs192.ticitacatoey.views.canvas.BackgroundCanvas
-import com.abs192.ticitacatoey.views.scenes.NewGameScene
-import com.abs192.ticitacatoey.views.scenes.PlayComputerScene
-import com.abs192.ticitacatoey.views.scenes.SceneType
-import com.abs192.ticitacatoey.views.scenes.TTTScene
+import com.abs192.ticitacatoey.views.scenes.*
+import kotlinx.android.synthetic.main.layout_game.*
 import java.util.*
 
 class MainActivity : AppCompatActivity() {
@@ -51,6 +50,7 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 override fun onHumanClicked() {
+                    sceneStack.add(playHumanScene())
                 }
             })
         newGameScene.initScene()
@@ -64,10 +64,10 @@ class MainActivity : AppCompatActivity() {
             mainLayout!!,
             object : PlayComputerScene.PlayComputerButtonClickListener {
                 override fun onEasyClicked() {
-
+                    sceneStack.add(playGameComputerEasy())
                 }
 
-                override fun onDifficultClick() {
+                override fun onHardClicked() {
 
                 }
             })
@@ -75,62 +75,72 @@ class MainActivity : AppCompatActivity() {
         return playComputerScene
     }
 
+    private fun playGameComputerEasy(): GameScene {
+        backgroundCanvas?.computerGameStart()
+        val gameScene = GameScene(this, layoutInflater, mainLayout!!)
+        gameScene.initGameInfo(GameInfo("a",1,2))
+        gameScene.initScene()
+        return gameScene
+    }
+
+    private fun playGame() {
+
+    }
+
+    private fun playHumanScene(): PlayHumanScene {
+        val playHumanScene = PlayHumanScene(
+            this,
+            layoutInflater,
+            mainLayout!!,
+            object : PlayHumanScene.PlayHumanButtonClickListener {
+                override fun onLocalClicked() {
+                }
+
+                override fun onBluetoothClicked() {
+
+                }
+
+                override fun onOnlineClicked() {
+
+                }
+            })
+        playHumanScene.initScene()
+        return playHumanScene
+    }
+
+    override fun onPause() {
+        super.onPause()
+        backgroundCanvas?.pause()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        backgroundCanvas?.resume()
+    }
+
     override fun onBackPressed() {
         Log.d(javaClass.name, "SceneStack: ${sceneStack.size}")
         Log.d(javaClass.name, "MainLayout childCount: ${mainLayout?.childCount}")
         if (!sceneStack.isEmpty() && sceneStack.size != 1) {
+
+            if (sceneStack.peek().sceneType == SceneType.GAME) {
+                // are you sure dialog
+                Log.d(javaClass.name, "Game ongoing")
+            }
+
             sceneStack.pop().backPressed()
             sceneStack.peek().fadeInFast()
+            correctBackgroundTint()
         } else
             super.onBackPressed()
     }
 
-//
-//    private fun buttonPressedPlayHuman() {
-//        enableDisableViews(false, newGameLayout, buttonPlayComputer, buttonPlayHuman)
-//        animatorUtil.fadeOut(
-//            newGameLayout,
-//            AnimatorUtil.Duration.MEDIUM,
-//            object : AnimatorListenerAdapter() {
-//                override fun onAnimationEnd(animation: Animator?) {
-//
-//                }
-//            })
-//    }
-//
-//    private fun buttonPressedPlayComputer() {
-//        enableDisableViews(false, newGameLayout, buttonPlayComputer, buttonPlayHuman)
-//        animatorUtil.fadeOut(
-//            newGameLayout,
-//            AnimatorUtil.Duration.MEDIUM,
-//            object : AnimatorListenerAdapter() {
-//                override fun onAnimationEnd(animation: Animator?) {
-//                    showNewGameComputerLayout()
-//                }
-//            })
-//    }
-//
-//
-//    private fun showNewGameComputerLayout() {
-//        newGameLayoutComputer = layoutInflater.inflate(R.layout.layout_new_game_computer, null)
-//        setConstraintCenterInMainLayout(newGameLayoutComputer!!)
-//
-//        newGameLayoutComputer = findViewById(R.id.newGameLayoutComputer)
-//        buttonPlayComputerEasy = findViewById(R.id.newGameButtonComputerEasy)
-//        buttonPlayComputerDifficult = findViewById(R.id.newGameButtonComputerDifficult)
-//        animatorUtil.fadeIn(newGameLayoutComputer, AnimatorUtil.Duration.LONG, null)
-//
-//
-//        buttonPlayComputerEasy?.setOnClickListener { buttonPressedPlayComputerEasy() }
-//        buttonPlayComputerDifficult?.setOnClickListener { buttonPressedPlayComputerDifficult() }
-//    }
-//
-//    private fun buttonPressedPlayComputerDifficult() {
-//
-//    }
-//
-//    private fun buttonPressedPlayComputerEasy() {
-//
-//    }
+    private fun correctBackgroundTint() {
+        if (sceneStack.peek().sceneType != SceneType.GAME) {
+            // TODO: handle better based on game type
+            backgroundCanvas?.computerGameEnd()
+        }
+
+    }
 
 }

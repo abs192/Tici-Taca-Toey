@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/newGameLayoutComputer"
+    android:id="@+id/newGameLayoutHuman"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_centerInParent="true"
@@ -16,11 +16,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:text="Play vs"
+        android:text="Play Human"
         android:textColor="#EEE"
-        android:textSize="35dp"
-        android:textStyle="bold"
-        android:visibility="invisible" />
+        android:textSize="30dp"
+        android:textStyle="bold" />
 
     <LinearLayout
         android:layout_width="wrap_content"
@@ -29,21 +28,30 @@
         android:orientation="horizontal">
 
         <Button
-            android:id="@+id/newGameButtonComputerEasy"
+            android:id="@+id/newGameButtonHumanLocal"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
             android:background="@drawable/button_background"
-            android:text="Easy"
+            android:text="Local"
             android:textColor="#EEE" />
 
         <Button
-            android:id="@+id/newGameButtonComputerDifficult"
+            android:id="@+id/newGameButtonHumanBluetooth"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
             android:background="@drawable/button_background"
-            android:text="Difficult"
+            android:text="Bluetooth"
+            android:textColor="#EEE" />
+
+        <Button
+            android:id="@+id/newGameButtonHumanOnline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:background="@drawable/button_background"
+            android:text="Online"
             android:textColor="#EEE" />
     </LinearLayout>
 </LinearLayout>

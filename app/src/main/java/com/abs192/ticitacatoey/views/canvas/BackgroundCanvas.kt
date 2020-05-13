@@ -1,12 +1,17 @@
 package com.abs192.ticitacatoey.views.canvas
 
+import android.animation.PropertyValuesHolder
 import android.animation.TimeAnimator
 import android.animation.TimeAnimator.TimeListener
+import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.drawable.Drawable
 import android.util.AttributeSet
 import android.view.View
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.DrawableCompat
 import com.abs192.ticitacatoey.R
 import java.util.*
 import kotlin.math.roundToInt
@@ -16,14 +21,17 @@ class BackgroundCanvas(context: Context, attributeSet: AttributeSet?) :
 
     private val baseSpeed = 200
     private val XO_COUNT = 32
-    private val RANDOM_SEED = 1337L
-
+    private val RANDOM_SEED = 1994L
     private val SCALEMINPART = 0.45f
+
     private val SCALERANDOMPART = 0.55f
     private val ALPHASCALEPART = 0.5f
     private val ALPHARANDOMPART = 0.5f
 
+    private val propertyDrawableColor = "anim_property_drawable_color"
+    private val propertyZoom = "anim_property_zoom"
 
+    private var zoomScale = 1F
     private var mCurrentPlayTime = 0L
     private var mBaseSpeed = 0f
 
@@ -44,6 +52,9 @@ class BackgroundCanvas(context: Context, attributeSet: AttributeSet?) :
     }
 
     override fun onDraw(canvas: Canvas?) {
+
+        canvas?.scale(zoomScale, zoomScale, width / 2F, height / 2F)
+
         val viewHeight = height
         for (xoo in xoArray) {
             val xo = xoo!!
@@ -52,7 +63,6 @@ class BackgroundCanvas(context: Context, attributeSet: AttributeSet?) :
             if (xo.y + starSize < 0 || xo.y - starSize > viewHeight) {
                 continue
             }
-
             // Save the current canvas state
             val save = canvas?.save()
             // Move the canvas to the center of the star
@@ -61,7 +71,6 @@ class BackgroundCanvas(context: Context, attributeSet: AttributeSet?) :
             // Rotate the canvas based on how far the star has moved
             val progress: Float = (xo.y + starSize) / viewHeight
             canvas?.rotate(360 * progress)
-
             // Prepare the size and alpha of the drawable
             val size = starSize.roundToInt()
 
@@ -70,7 +79,7 @@ class BackgroundCanvas(context: Context, attributeSet: AttributeSet?) :
 
                     mXDrawable.setBounds(-size, -size, size, size)
                     mXDrawable.alpha = (255 * xo.alpha).roundToInt()
-
+//                    canvas?.scale(zoomScale, zoomScale)
                     // Draw the star to the canvas
                     canvas?.let { mXDrawable.draw(it) }
 
@@ -79,7 +88,7 @@ class BackgroundCanvas(context: Context, attributeSet: AttributeSet?) :
 
                     mODrawable.setBounds(-size, -size, size, size)
                     mODrawable.alpha = (255 * xo.alpha).roundToInt()
-
+//                    canvas?.scale(zoomScale, zoomScale)
                     // Draw the star to the canvas
                     canvas?.let { mODrawable.draw(it) }
 
@@ -105,10 +114,10 @@ class BackgroundCanvas(context: Context, attributeSet: AttributeSet?) :
         viewHeight: Int
     ): XO {
 
-        xo.shape = if (mRnd.nextInt() % 2 == 1)
-            XOShape.X
-        else
+        xo.shape = if (mRnd.nextInt(2) == 1)
             XOShape.O
+        else
+            XOShape.X
 
         xo.scale = SCALEMINPART + SCALERANDOMPART * mRnd.nextFloat()
 
@@ -171,7 +180,7 @@ class BackgroundCanvas(context: Context, attributeSet: AttributeSet?) :
     }
 
     fun resume() {
-        if (mTimeAnimator != null && mTimeAnimator.isPaused) {
+        if (mTimeAnimator.isPaused) {
             mTimeAnimator.start()
             mTimeAnimator.currentPlayTime = mCurrentPlayTime
         }
@@ -184,4 +193,70 @@ class BackgroundCanvas(context: Context, attributeSet: AttributeSet?) :
         mTimeAnimator.removeAllListeners()
     }
 
+//    fun startDrawablesColorTransition(
+//        drawable: Drawable,
+//        color1: Int,
+//        color2: Int,
+//        timeMillis: Long
+//    ) {
+//
+////        val min = color1.coerceAtMost(color2)
+////        val max = color1.coerceAtLeast(color2)
+//
+//        val propertyColor: PropertyValuesHolder =
+//            PropertyValuesHolder.ofInt(propertyDrawableColor, color1, color2)
+//        val animator = ValueAnimator()
+//        animator.setValues(propertyColor)
+//        animator.duration = timeMillis
+//        animator.addUpdateListener { animation ->
+//            val color = animation.getAnimatedValue(propertyDrawableColor) as Int
+//            DrawableCompat.setTint(drawable, color)
+//        }
+//        animator.start()
+//    }
+
+    private fun startZoomOut(
+    ) {
+
+        val propertyZoomIn: PropertyValuesHolder =
+            PropertyValuesHolder.ofFloat(propertyZoom, 1F, 0.8F)
+        val animator = ValueAnimator()
+        animator.setValues(propertyZoomIn)
+        animator.duration = 1000L
+        animator.addUpdateListener { animation ->
+            zoomScale = animation.getAnimatedValue(propertyZoom) as Float
+        }
+        animator.start()
+    }
+
+    private fun startZoomIn(
+    ) {
+        val propertyZoomIn: PropertyValuesHolder =
+            PropertyValuesHolder.ofFloat(propertyZoom, 0.8F, 1F)
+        val animator = ValueAnimator()
+        animator.setValues(propertyZoomIn)
+        animator.duration = 1000L
+        animator.addUpdateListener { animation ->
+            zoomScale = animation.getAnimatedValue(propertyZoom) as Float
+        }
+        animator.start()
+    }
+
+    fun computerGameStart() {
+//        startDrawablesColorTransition(
+//            mXDrawable,
+//            Color.parseColor("#EEEEEE"),
+//            Color.parseColor("#11EE11"),
+//            500
+//        )
+        startZoomOut()
+        DrawableCompat.setTint(mXDrawable, Color.parseColor("#11EE11"))
+        DrawableCompat.setTint(mODrawable, Color.parseColor("#11EE11"))
+    }
+
+    fun computerGameEnd() {
+        startZoomIn()
+        DrawableCompat.setTint(mXDrawable, Color.parseColor("#EEEEEE"))
+        DrawableCompat.setTint(mODrawable, Color.parseColor("#EEEEEE"))
+    }
 }
