@@ -7,6 +7,7 @@ import android.view.Window
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
+import com.abs192.ticitacatoey.game.Player
 import com.abs192.ticitacatoey.types.GameInfo
 import com.abs192.ticitacatoey.views.AnimatorUtil
 import com.abs192.ticitacatoey.views.canvas.BackgroundCanvas
@@ -78,13 +79,9 @@ class MainActivity : AppCompatActivity() {
     private fun playGameComputerEasy(): GameScene {
         backgroundCanvas?.computerGameStart()
         val gameScene = GameScene(this, layoutInflater, mainLayout!!)
-        gameScene.initGameInfo(GameInfo("a",1,2))
+        gameScene.initGameInfo(GameInfo("a", Player("", ""), Player("", "")))
         gameScene.initScene()
         return gameScene
-    }
-
-    private fun playGame() {
-
     }
 
     private fun playHumanScene(): PlayHumanScene {

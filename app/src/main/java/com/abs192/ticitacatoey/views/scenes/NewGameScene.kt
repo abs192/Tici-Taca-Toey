@@ -34,7 +34,6 @@ class NewGameScene(
             fadeOut()
             listener.onHumanClicked()
         }
-
     }
 
     override fun backPressed() {

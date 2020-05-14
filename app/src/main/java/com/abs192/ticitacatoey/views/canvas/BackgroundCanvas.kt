@@ -53,7 +53,7 @@ class BackgroundCanvas(context: Context, attributeSet: AttributeSet?) :
 
     override fun onDraw(canvas: Canvas?) {
 
-        canvas?.scale(zoomScale, zoomScale, width / 2F, height / 2F)
+//        canvas?.scale(zoomScale, zoomScale, width / 2F, height / 2F)
 
         val viewHeight = height
         for (xoo in xoArray) {
@@ -113,7 +113,6 @@ class BackgroundCanvas(context: Context, attributeSet: AttributeSet?) :
         viewWidth: Int,
         viewHeight: Int
     ): XO {
-
         xo.shape = if (mRnd.nextInt(2) == 1)
             XOShape.O
         else

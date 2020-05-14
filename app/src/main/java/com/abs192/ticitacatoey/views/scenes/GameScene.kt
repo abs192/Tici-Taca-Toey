@@ -5,6 +5,9 @@ import android.view.LayoutInflater
 import android.view.View
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.abs192.ticitacatoey.R
+import com.abs192.ticitacatoey.game.Game
+import com.abs192.ticitacatoey.game.GameManager
+import com.abs192.ticitacatoey.game.Player
 import com.abs192.ticitacatoey.types.GameInfo
 import com.abs192.ticitacatoey.views.AnimatorUtil
 import com.abs192.ticitacatoey.views.canvas.GridCanvas
@@ -25,6 +28,13 @@ class GameScene(
         fadeIn()
 
         gridCanvas = gameLayout?.findViewById(R.id.gridCanvas)
+        val game = Game()
+        val gameInfo = GameInfo(
+            "1", Player("you", "")
+            , Player("computer", "")
+        )
+        val gameManager = GameManager(game, gameInfo, gridCanvas!!)
+
     }
 
     override fun backPressed() {
