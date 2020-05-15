@@ -8,12 +8,19 @@ import com.abs192.ticitacatoey.views.canvas.GridCanvas
 class GameManager(var game: Game, var gameInfo: GameInfo, var gameGrid: GridCanvas) :
     MoveInputListener {
 
-    private var postMoveInputListener: PostMoveEventListener? = null
-
+    private var player1PostMoveInputListener: PostMoveEventListener? = null
+    private var player2PostMoveInputListener: PostMoveEventListener? = null
 
     init {
+        // depending on the game type
+        gameGrid.initColors(gameInfo.colorSet)
         gameGrid.registerMoveListener(this)
-        postMoveInputListener = gameGrid
+        player1PostMoveInputListener = gameGrid
+
+        val computerPlayer = gameInfo.player2 as ComputerPlayer
+        player2PostMoveInputListener = computerPlayer
+        computerPlayer.registerMoveListener(this)
+
         startNewGame()
     }
 
@@ -22,10 +29,30 @@ class GameManager(var game: Game, var gameInfo: GameInfo, var gameGrid: GridCanv
         val ox = if (xo == "x") "o" else "x"
         gameInfo.player1.assignXO(xo)
         gameInfo.player2.assignXO(ox)
+        game.resetToMove()
     }
 
-    override fun makeMove(x: Int, y: Int) {
+    private fun isItPlayersTurn(playerId: String): Boolean {
+        if (gameInfo.player1.playerId == playerId) {
+            return gameInfo.player1.xo == game.getToMove()
+        } else if (gameInfo.player2.playerId == playerId) {
+            return gameInfo.player2.xo == game.getToMove()
+        }
+        return false
+    }
+
+    override fun makeMove(playerId: String, x: Int, y: Int) {
         Log.d(javaClass.simpleName, "toMove ${game.getToMove()}")
+
+        if (!isItPlayersTurn(playerId)) {
+            if (gameInfo.player1.playerId == playerId) {
+                player1PostMoveInputListener?.moveRejected()
+            } else if (gameInfo.player2.playerId == playerId) {
+                player2PostMoveInputListener?.moveRejected()
+            }
+            return
+        }
+
         for (i in 0 until 3) {
             for (j in 0 until 3) {
                 val xo = game.getXO(i, j)
@@ -38,21 +65,24 @@ class GameManager(var game: Game, var gameInfo: GameInfo, var gameGrid: GridCanv
             return
         }
 
-        val moveDone: Boolean
-        if (game.getToMove() == "o") {
-            moveDone = game.makeMoveO(x, y)
+        val xoToMove = game.getToMove()
+        val moveDone: Boolean = if (xoToMove == "o") {
+            game.makeMoveO(x, y)
         } else {
-            moveDone = game.makeMoveX(x, y)
+            game.makeMoveX(x, y)
         }
-        if (moveDone)
-            postMoveInputListener?.moveDone()
-        else
-            postMoveInputListener?.moveRejected()
-
+        if (moveDone) {
+            player1PostMoveInputListener?.moveDone(x, y, xoToMove)
+            player2PostMoveInputListener?.moveDone(x, y, xoToMove)
+        } else {
+            player1PostMoveInputListener?.moveRejected()
+            player2PostMoveInputListener?.moveRejected()
+        }
         checkEnd = game.checkEnd()
         if (checkEnd != GameState.ONGOING) {
             updateScore(checkEnd)
-            postMoveInputListener?.gameEnd(checkEnd)
+            player1PostMoveInputListener?.gameEnd(checkEnd)
+            player2PostMoveInputListener?.gameEnd(checkEnd)
             // restart after 2 secs
             Handler().postDelayed({
                 game.resetBoard()
@@ -82,9 +112,10 @@ class GameManager(var game: Game, var gameInfo: GameInfo, var gameGrid: GridCanv
     }
 
 
-    fun startNewGame() {
+    private fun startNewGame() {
         resetPlayerXOs()
-        gameGrid.startGame(game, gameInfo)
+        player1PostMoveInputListener?.gameStarting(game, gameInfo)
+        player2PostMoveInputListener?.gameStarting(game, gameInfo)
     }
 
     fun endGame() {

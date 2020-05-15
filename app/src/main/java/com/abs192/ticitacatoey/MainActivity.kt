@@ -2,17 +2,15 @@ package com.abs192.ticitacatoey
 
 import android.os.Bundle
 import android.util.Log
-import android.view.View
 import android.view.Window
-import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
+import com.abs192.ticitacatoey.game.ComputerPlayer
+import com.abs192.ticitacatoey.game.DefaultColorSets
 import com.abs192.ticitacatoey.game.Player
 import com.abs192.ticitacatoey.types.GameInfo
-import com.abs192.ticitacatoey.views.AnimatorUtil
 import com.abs192.ticitacatoey.views.canvas.BackgroundCanvas
 import com.abs192.ticitacatoey.views.scenes.*
-import kotlinx.android.synthetic.main.layout_game.*
 import java.util.*
 
 class MainActivity : AppCompatActivity() {
@@ -22,6 +20,8 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var currentViewState: SceneType
     private var sceneStack: Stack<TTTScene> = Stack()
+
+    private var player = Player("", "")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -79,7 +79,14 @@ class MainActivity : AppCompatActivity() {
     private fun playGameComputerEasy(): GameScene {
         backgroundCanvas?.computerGameStart()
         val gameScene = GameScene(this, layoutInflater, mainLayout!!)
-        gameScene.initGameInfo(GameInfo("a", Player("", ""), Player("", "")))
+        gameScene.initGameInfo(
+            GameInfo(
+                "a",
+                player,
+                ComputerPlayer(),
+                DefaultColorSets().computerColorSet
+            )
+        )
         gameScene.initScene()
         return gameScene
     }

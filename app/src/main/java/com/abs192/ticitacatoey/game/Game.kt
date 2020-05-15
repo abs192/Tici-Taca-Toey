@@ -6,15 +6,8 @@ import kotlin.random.Random
 class Game {
 
     private val board = arrayListOf("", "", "", "", "", "", "", "", "")
-
+    private val rnd = Random(1231L)
     private var toMove = randomMove()
-
-    fun randomMove(): String {
-        return if (Random(1231L).nextInt(2) == 1)
-            "x"
-        else "o"
-    }
-//    private var toMove = "o"
 
     fun getToMove(): String {
         return toMove
@@ -116,6 +109,16 @@ class Game {
         for (index in board.indices) {
             board[index] = ""
         }
+        toMove = randomMove()
+    }
+
+    fun randomMove(): String {
+        return if (rnd.nextInt(2) == 1)
+            "x"
+        else "o"
+    }
+
+    fun resetToMove() {
         toMove = randomMove()
     }
 }

@@ -5,6 +5,7 @@ class ColorSet(
     val player1TintColor: Int,
     val player2TintColor: Int,
     val bannerTextColor: Int,
+    val bannerSubTextColor: Int,
     val gameWinSquareColor: Int,
     val gameLoseSquareColor: Int,
     val gameDrawSquareColor: Int,

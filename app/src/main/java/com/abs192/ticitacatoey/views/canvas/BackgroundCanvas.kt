@@ -249,8 +249,8 @@ class BackgroundCanvas(context: Context, attributeSet: AttributeSet?) :
 //            500
 //        )
         startZoomOut()
-        DrawableCompat.setTint(mXDrawable, Color.parseColor("#11EE11"))
-        DrawableCompat.setTint(mODrawable, Color.parseColor("#11EE11"))
+        DrawableCompat.setTint(mXDrawable, Color.parseColor("#007400"))
+        DrawableCompat.setTint(mODrawable, Color.parseColor("#007400"))
     }
 
     fun computerGameEnd() {
