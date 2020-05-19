@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.abs192.ticitacatoey.game.ComputerPlayer
 import com.abs192.ticitacatoey.game.DefaultColorSets
+import com.abs192.ticitacatoey.game.GameManager
 import com.abs192.ticitacatoey.game.Player
 import com.abs192.ticitacatoey.types.GameInfo
 import com.abs192.ticitacatoey.views.canvas.BackgroundCanvas
@@ -65,25 +66,29 @@ class MainActivity : AppCompatActivity() {
             mainLayout!!,
             object : PlayComputerScene.PlayComputerButtonClickListener {
                 override fun onEasyClicked() {
-                    sceneStack.add(playGameComputerEasy())
+                    sceneStack.add(playGameComputer(ComputerPlayer.Difficulty.EASY))
                 }
 
                 override fun onHardClicked() {
+                    sceneStack.add(playGameComputer(ComputerPlayer.Difficulty.HARD))
+                }
 
+                override fun onImpossibleClicked() {
+                    sceneStack.add(playGameComputer(ComputerPlayer.Difficulty.IMPOSSIBLE))
                 }
             })
         playComputerScene.initScene()
         return playComputerScene
     }
 
-    private fun playGameComputerEasy(): GameScene {
+    private fun playGameComputer(difficulty: ComputerPlayer.Difficulty): GameScene {
         backgroundCanvas?.computerGameStart()
-        val gameScene = GameScene(this, layoutInflater, mainLayout!!)
+        val gameScene = GameScene(GameManager.GameMode.COMPUTER, this, layoutInflater, mainLayout!!)
         gameScene.initGameInfo(
             GameInfo(
                 "a",
                 player,
-                ComputerPlayer(),
+                ComputerPlayer(difficulty),
                 DefaultColorSets().computerColorSet
             )
         )
@@ -98,6 +103,7 @@ class MainActivity : AppCompatActivity() {
             mainLayout!!,
             object : PlayHumanScene.PlayHumanButtonClickListener {
                 override fun onLocalClicked() {
+                    sceneStack.add(playGameHuman())
                 }
 
                 override fun onBluetoothClicked() {
@@ -110,6 +116,21 @@ class MainActivity : AppCompatActivity() {
             })
         playHumanScene.initScene()
         return playHumanScene
+    }
+
+    private fun playGameHuman(): GameScene {
+        backgroundCanvas?.computerGameStart()
+        val gameScene = GameScene(GameManager.GameMode.HUMAN, this, layoutInflater, mainLayout!!)
+        gameScene.initGameInfo(
+            GameInfo(
+                "a",
+                player,
+                Player("p2", "p2"),
+                DefaultColorSets().computerColorSet
+            )
+        )
+        gameScene.initScene()
+        return gameScene
     }
 
     override fun onPause() {

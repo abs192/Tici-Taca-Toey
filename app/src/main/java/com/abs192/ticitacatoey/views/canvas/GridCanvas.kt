@@ -74,6 +74,8 @@ class GridCanvas(context: Context, attributeSet: AttributeSet?) : View(context, 
     private val bannerBottomTextLosePaint = Paint()
     private val bannerBottomTextDrawPaint = Paint()
 
+    private var isAgainstComputer = false
+
     init {
         topRect = Rect(
             0,
@@ -372,11 +374,24 @@ class GridCanvas(context: Context, attributeSet: AttributeSet?) : View(context, 
             selectedSquare = getBoardPos(event.x, event.y)
             if (selectedSquare.x != -1 && selectedSquare.y != -1) {
                 Log.d(javaClass.simpleName, "yo moveInput $selectedSquare")
-                moveInputListener.makeMove(
-                    gameInfo.player1.playerId,
-                    selectedSquare.x,
-                    selectedSquare.y
-                )
+
+                if (isAgainstComputer) {
+                    moveInputListener.makeMove(
+                        gameInfo.player1.playerId,
+                        selectedSquare.x,
+                        selectedSquare.y
+                    )
+                } else {
+                    val playerIdToMove = if (game.getToMove() == gameInfo.player1.xo)
+                        gameInfo.player1.playerId
+                    else
+                        gameInfo.player2.playerId
+                    moveInputListener.makeMove(
+                        playerIdToMove,
+                        selectedSquare.x,
+                        selectedSquare.y
+                    )
+                }
             }
             invalidate()
             return true
@@ -436,6 +451,10 @@ class GridCanvas(context: Context, attributeSet: AttributeSet?) : View(context, 
     ) {
         this.game = game
         this.gameInfo = gameInfo
+
+        if (gameInfo.player2 is ComputerPlayer) {
+            isAgainstComputer = true
+        }
         initBannerText()
         initXOPlayerTints()
         invalidate()

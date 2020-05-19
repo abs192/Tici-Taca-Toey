@@ -4,11 +4,13 @@ import android.os.Handler
 import android.util.Log
 import com.abs192.ticitacatoey.types.GameInfo
 
-class ComputerPlayer : Player("computerEZ", "EZ"), PostMoveEventListener {
+class ComputerPlayer(difficulty: Difficulty) : Player("computerEZ", "EZ"),
+    PostMoveEventListener {
 
     private val tag = "BEEP BOOP"
     private val myBoard = arrayListOf("", "", "", "", "", "", "", "", "")
     private var moveInputListener: MoveInputListener? = null
+    private val computerLogic = ComputerLogic(difficulty)
 
     override fun gameStarting(
         game: Game,
@@ -30,14 +32,9 @@ class ComputerPlayer : Player("computerEZ", "EZ"), PostMoveEventListener {
 
     private fun makeAMove() {
         Handler().postDelayed({
-            val emptyCells = arrayListOf<Int>()
-            myBoard.indices.forEach { if (myBoard[it] == "") emptyCells.add(it) }
-            if (emptyCells.isNotEmpty()) {
-                emptyCells.shuffle()
-                val x = emptyCells[0] / 3
-                val y = emptyCells[0] % 3
-                moveInputListener?.makeMove(playerId, x, y)
-            }
+            val pair = computerLogic.makeMove(myBoard)
+            pair?.let { moveInputListener?.makeMove(playerId, pair.first, pair.second) }
+
         }, 500)
     }
 
@@ -56,6 +53,12 @@ class ComputerPlayer : Player("computerEZ", "EZ"), PostMoveEventListener {
 
     fun registerMoveListener(moveInputListener: MoveInputListener) {
         this.moveInputListener = moveInputListener
+    }
+
+    enum class Difficulty {
+        EASY,
+        HARD,
+        IMPOSSIBLE
     }
 
 }

@@ -19,7 +19,7 @@
         android:text="Difficulty"
         android:textColor="#EEE"
         android:textSize="30dp"
-        android:textStyle="bold"  />
+        android:textStyle="bold" />
 
     <LinearLayout
         android:layout_width="wrap_content"
@@ -43,6 +43,15 @@
             android:layout_margin="8dp"
             android:background="@drawable/button_background"
             android:text="Hard"
+            android:textColor="#EEE" />
+
+        <Button
+            android:id="@+id/newGameButtonComputerImpossible"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:background="@drawable/button_background"
+            android:text="Impossible"
             android:textColor="#EEE" />
     </LinearLayout>
 </LinearLayout>

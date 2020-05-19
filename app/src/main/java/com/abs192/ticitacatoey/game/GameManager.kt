@@ -5,22 +5,38 @@ import android.util.Log
 import com.abs192.ticitacatoey.types.GameInfo
 import com.abs192.ticitacatoey.views.canvas.GridCanvas
 
-class GameManager(var game: Game, var gameInfo: GameInfo, var gameGrid: GridCanvas) :
+class GameManager(
+    private val gameMode: GameMode,
+    var game: Game,
+    var gameInfo: GameInfo,
+    private val gameGrid: GridCanvas
+) :
     MoveInputListener {
 
     private var player1PostMoveInputListener: PostMoveEventListener? = null
     private var player2PostMoveInputListener: PostMoveEventListener? = null
 
-    init {
+
+    fun initialize() {
         // depending on the game type
         gameGrid.initColors(gameInfo.colorSet)
-        gameGrid.registerMoveListener(this)
-        player1PostMoveInputListener = gameGrid
 
-        val computerPlayer = gameInfo.player2 as ComputerPlayer
-        player2PostMoveInputListener = computerPlayer
-        computerPlayer.registerMoveListener(this)
 
+        when (gameMode) {
+            GameMode.COMPUTER -> {
+                gameGrid.registerMoveListener(this)
+                player1PostMoveInputListener = gameGrid
+
+                val computerPlayer = gameInfo.player2 as ComputerPlayer
+                player2PostMoveInputListener = computerPlayer
+                computerPlayer.registerMoveListener(this)
+            }
+            GameMode.HUMAN -> {
+                gameGrid.registerMoveListener(this)
+                player1PostMoveInputListener = gameGrid
+                player2PostMoveInputListener = gameGrid
+            }
+        }
         startNewGame()
     }
 
@@ -111,7 +127,6 @@ class GameManager(var game: Game, var gameInfo: GameInfo, var gameGrid: GridCanv
         }
     }
 
-
     private fun startNewGame() {
         resetPlayerXOs()
         player1PostMoveInputListener?.gameStarting(game, gameInfo)
@@ -125,4 +140,8 @@ class GameManager(var game: Game, var gameInfo: GameInfo, var gameGrid: GridCanv
 
     }
 
+    enum class GameMode {
+        COMPUTER,
+        HUMAN
+    }
 }

@@ -13,10 +13,4 @@ class GameInfo(
     var countWinsPlayer1 = 0
     var countWinsPlayer2 = 0
     var countDraws = 0
-//    public var gameGridTintColor: Int
-//
-//    init {
-//        gameGridTintColor = Color.parseColor("#FFFFFF")
-//    }
-
 }

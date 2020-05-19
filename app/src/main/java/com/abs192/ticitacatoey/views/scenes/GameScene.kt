@@ -11,6 +11,7 @@ import com.abs192.ticitacatoey.views.AnimatorUtil
 import com.abs192.ticitacatoey.views.canvas.GridCanvas
 
 class GameScene(
+    private val gameMode: GameManager.GameMode,
     context: Context,
     layoutInflater: LayoutInflater,
     mainLayout: ConstraintLayout
@@ -27,8 +28,8 @@ class GameScene(
 
         gridCanvas = gameLayout?.findViewById(R.id.gridCanvas)
         val game = Game()
-        val gameManager = GameManager(game, gameInfo, gridCanvas!!)
-
+        val gameManager = GameManager(gameMode, game, gameInfo, gridCanvas!!)
+        gameManager.initialize()
     }
 
     override fun backPressed() {
