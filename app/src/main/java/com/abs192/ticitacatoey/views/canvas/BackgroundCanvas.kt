@@ -7,12 +7,12 @@ import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
-import android.graphics.drawable.Drawable
 import android.util.AttributeSet
 import android.view.View
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
 import com.abs192.ticitacatoey.R
+import com.abs192.ticitacatoey.Utils
 import java.util.*
 import kotlin.math.roundToInt
 
@@ -20,31 +20,41 @@ class BackgroundCanvas(context: Context, attributeSet: AttributeSet?) :
     View(context, attributeSet) {
 
     private val baseSpeed = 200
-    private val XO_COUNT = 32
-    private val RANDOM_SEED = 1994L
-    private val SCALEMINPART = 0.45f
+    private val xoCount = 35
+    private val randomSeed = 1994L
 
-    private val SCALERANDOMPART = 0.55f
-    private val ALPHASCALEPART = 0.5f
-    private val ALPHARANDOMPART = 0.5f
+    private val scaleMinPart = 0.45f
+    private val scaleRandomPart = 0.55f
 
-    private val propertyDrawableColor = "anim_property_drawable_color"
+    private val alphaScalePart = 0.5f
+    private val alphaRandomPart = 0.5f
+
+    private val colorTintScalePart = -20f
+    private val colorTintRandomPart = 0.75f
+
     private val propertyZoom = "anim_property_zoom"
 
-    private var zoomScale = 1F
     private var mCurrentPlayTime = 0L
     private var mBaseSpeed = 0f
-
     private var mBaseSize = 0f
 
-    var mRnd = Random(RANDOM_SEED)
-    private val xoArray: Array<XO?> = arrayOfNulls(XO_COUNT)
+    private var zoomScale = 1F
+    private var maxZoom = 1.2F
+    private var minZoom = 1F
+    private var zoomInAnimator = ValueAnimator()
+    private var zoomOutAnimator = ValueAnimator()
+
+    var mRnd = Random(randomSeed)
+    private val xoArray: Array<XO?> = arrayOfNulls(xoCount)
 
     private var mTimeAnimator: TimeAnimator = TimeAnimator()
     private val mXDrawable = ContextCompat.getDrawable(context, R.drawable.x_shape)!!
     private val mODrawable = ContextCompat.getDrawable(context, R.drawable.o_shape)!!
 
-    var squareSize: Int = context.resources?.displayMetrics?.widthPixels!!
+    private var mXDrawableTint: Int = Color.parseColor("#EEEEEE")
+    private var mODrawableTint: Int = Color.parseColor("#EEEEEE")
+
+    private val utils = Utils()
 
     init {
         mBaseSize = mXDrawable.intrinsicWidth.coerceAtLeast(mXDrawable.intrinsicHeight) / 2f
@@ -52,9 +62,7 @@ class BackgroundCanvas(context: Context, attributeSet: AttributeSet?) :
     }
 
     override fun onDraw(canvas: Canvas?) {
-
-//        canvas?.scale(zoomScale, zoomScale, width / 2F, height / 2F)
-
+        canvas?.scale(zoomScale, zoomScale, width / 2F, height / 2F)
         val viewHeight = height
         for (xoo in xoArray) {
             val xo = xoo!!
@@ -79,6 +87,13 @@ class BackgroundCanvas(context: Context, attributeSet: AttributeSet?) :
 
                     mXDrawable.setBounds(-size, -size, size, size)
                     mXDrawable.alpha = (255 * xo.alpha).roundToInt()
+                    val tintColor = Color.parseColor(
+                        utils.shadeColor(
+                            mXDrawableTint,
+                            (colorTintScalePart + colorTintRandomPart * mRnd.nextFloat()).toInt()
+                        )
+                    )
+                    DrawableCompat.setTint(mXDrawable, tintColor)
 //                    canvas?.scale(zoomScale, zoomScale)
                     // Draw the star to the canvas
                     canvas?.let { mXDrawable.draw(it) }
@@ -88,10 +103,16 @@ class BackgroundCanvas(context: Context, attributeSet: AttributeSet?) :
 
                     mODrawable.setBounds(-size, -size, size, size)
                     mODrawable.alpha = (255 * xo.alpha).roundToInt()
+                    val tintColor = Color.parseColor(
+                        utils.shadeColor(
+                            mODrawableTint,
+                            (colorTintScalePart + colorTintRandomPart * mRnd.nextFloat()).toInt()
+                        )
+                    )
+                    DrawableCompat.setTint(mODrawable, tintColor)
 //                    canvas?.scale(zoomScale, zoomScale)
                     // Draw the star to the canvas
                     canvas?.let { mODrawable.draw(it) }
-
                 }
             }
             // Restore the canvas to it's previous position and rotation
@@ -113,12 +134,14 @@ class BackgroundCanvas(context: Context, attributeSet: AttributeSet?) :
         viewWidth: Int,
         viewHeight: Int
     ): XO {
-        xo.shape = if (mRnd.nextInt(2) == 1)
-            XOShape.O
-        else
-            XOShape.X
 
-        xo.scale = SCALEMINPART + SCALERANDOMPART * mRnd.nextFloat()
+        xo.shape = if (mRnd.nextInt(2) == 1) {
+            XOShape.O
+        } else {
+            XOShape.X
+        }
+
+        xo.scale = scaleMinPart + scaleRandomPart * mRnd.nextFloat()
 
         xo.x = viewWidth * mRnd.nextFloat()
         xo.y = viewHeight.toFloat()
@@ -126,8 +149,9 @@ class BackgroundCanvas(context: Context, attributeSet: AttributeSet?) :
         xo.y += xo.scale * mBaseSize
 
         xo.y += viewHeight * mRnd.nextFloat() / 4f
-        xo.alpha = ALPHASCALEPART * xo.scale + ALPHARANDOMPART * mRnd.nextFloat()
+        xo.alpha = alphaScalePart * xo.scale + alphaRandomPart * mRnd.nextFloat()
         xo.speed = mBaseSpeed * xo.alpha * xo.scale
+
         return xo
     }
 
@@ -192,70 +216,70 @@ class BackgroundCanvas(context: Context, attributeSet: AttributeSet?) :
         mTimeAnimator.removeAllListeners()
     }
 
-//    fun startDrawablesColorTransition(
-//        drawable: Drawable,
-//        color1: Int,
-//        color2: Int,
-//        timeMillis: Long
-//    ) {
-//
-////        val min = color1.coerceAtMost(color2)
-////        val max = color1.coerceAtLeast(color2)
-//
-//        val propertyColor: PropertyValuesHolder =
-//            PropertyValuesHolder.ofInt(propertyDrawableColor, color1, color2)
-//        val animator = ValueAnimator()
-//        animator.setValues(propertyColor)
-//        animator.duration = timeMillis
-//        animator.addUpdateListener { animation ->
-//            val color = animation.getAnimatedValue(propertyDrawableColor) as Int
-//            DrawableCompat.setTint(drawable, color)
-//        }
-//        animator.start()
-//    }
 
-    private fun startZoomOut(
-    ) {
+    private fun startZoomOut() {
 
-        val propertyZoomIn: PropertyValuesHolder =
-            PropertyValuesHolder.ofFloat(propertyZoom, 1F, 0.8F)
-        val animator = ValueAnimator()
-        animator.setValues(propertyZoomIn)
-        animator.duration = 1000L
-        animator.addUpdateListener { animation ->
-            zoomScale = animation.getAnimatedValue(propertyZoom) as Float
+        if (zoomInAnimator.isRunning) {
+            zoomInAnimator.end()
         }
-        animator.start()
+
+        if (!zoomOutAnimator.isRunning && zoomScale != minZoom) {
+            val propertyZoomIn: PropertyValuesHolder =
+                PropertyValuesHolder.ofFloat(propertyZoom, maxZoom, minZoom)
+            zoomOutAnimator = ValueAnimator()
+            zoomOutAnimator.setValues(propertyZoomIn)
+            zoomOutAnimator.duration = 1000L
+            zoomOutAnimator.addUpdateListener { animation ->
+                zoomScale = animation.getAnimatedValue(propertyZoom) as Float
+            }
+            zoomOutAnimator.start()
+        }
     }
 
-    private fun startZoomIn(
-    ) {
-        val propertyZoomIn: PropertyValuesHolder =
-            PropertyValuesHolder.ofFloat(propertyZoom, 0.8F, 1F)
-        val animator = ValueAnimator()
-        animator.setValues(propertyZoomIn)
-        animator.duration = 1000L
-        animator.addUpdateListener { animation ->
-            zoomScale = animation.getAnimatedValue(propertyZoom) as Float
+    private fun startZoomIn() {
+
+        if (zoomOutAnimator.isRunning) {
+            zoomOutAnimator.end()
         }
-        animator.start()
+        if (!zoomInAnimator.isRunning && zoomScale != maxZoom) {
+            if (zoomScale != 1.2F) {
+                val propertyZoomIn: PropertyValuesHolder =
+                    PropertyValuesHolder.ofFloat(propertyZoom, minZoom, maxZoom)
+                zoomInAnimator = ValueAnimator()
+                zoomInAnimator.setValues(propertyZoomIn)
+                zoomInAnimator.duration = 1000L
+                zoomInAnimator.addUpdateListener { animation ->
+                    zoomScale = animation.getAnimatedValue(propertyZoom) as Float
+                }
+                zoomInAnimator.start()
+            }
+        }
+    }
+
+    fun setDrawableTints(xColor: String, oColor: String) {
+        setDrawableTints(Color.parseColor(xColor), Color.parseColor(oColor))
+    }
+
+    fun setDrawableTints(xColor: Int, oColor: Int) {
+        mXDrawableTint = xColor
+        mODrawableTint = oColor
     }
 
     fun computerGameStart() {
-//        startDrawablesColorTransition(
-//            mXDrawable,
-//            Color.parseColor("#EEEEEE"),
-//            Color.parseColor("#11EE11"),
-//            500
-//        )
-        startZoomOut()
-        DrawableCompat.setTint(mXDrawable, Color.parseColor("#00AB00"))
-        DrawableCompat.setTint(mODrawable, Color.parseColor("#00AB00"))
+        startZoomIn()
+        setDrawableTints("#00AB00", "#00AB00")
     }
 
-    fun computerGameEnd() {
-        startZoomIn()
-        DrawableCompat.setTint(mXDrawable, Color.parseColor("#EEEEEE"))
-        DrawableCompat.setTint(mODrawable, Color.parseColor("#EEEEEE"))
+    fun normalTint() {
+        startZoomOut()
+        setDrawableTints("#EEEEEE", "#EEEEEE")
+    }
+
+    fun showErrorTint() {
+        setDrawableTints("#EE1111", "#EE1111")
+    }
+
+    fun showBluetoothTint() {
+        setDrawableTints("#287AA9", "#287AA9")
     }
 }

@@ -4,5 +4,6 @@ enum class SceneType {
     NEW_GAME,
     PLAY_COMPUTER,
     PLAY_HUMAN,
+    CONNECT_SCENE,
     GAME
 }

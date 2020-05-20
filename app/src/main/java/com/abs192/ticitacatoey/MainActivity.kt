@@ -1,10 +1,13 @@
 package com.abs192.ticitacatoey
 
+import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
 import android.view.Window
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
+import com.abs192.ticitacatoey.bluetooth.BTManager
 import com.abs192.ticitacatoey.game.ComputerPlayer
 import com.abs192.ticitacatoey.game.DefaultColorSets
 import com.abs192.ticitacatoey.game.GameManager
@@ -16,13 +19,14 @@ import java.util.*
 
 class MainActivity : AppCompatActivity() {
 
-    private var backgroundCanvas: BackgroundCanvas? = null
+    var backgroundCanvas: BackgroundCanvas? = null
     private var mainLayout: ConstraintLayout? = null
 
     private lateinit var currentViewState: SceneType
     private var sceneStack: Stack<TTTScene> = Stack()
 
     private var player = Player("", "")
+    private val btManager = BTManager()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -107,7 +111,7 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 override fun onBluetoothClicked() {
-
+                    sceneStack.add(bluetoothConnectScene())
                 }
 
                 override fun onOnlineClicked() {
@@ -117,6 +121,67 @@ class MainActivity : AppCompatActivity() {
         playHumanScene.initScene()
         return playHumanScene
     }
+
+
+    private fun bluetoothConnectScene(): BluetoothConnectScene {
+        val bluetoothConnectScene = BluetoothConnectScene(
+            this,
+            btManager,
+            layoutInflater,
+            mainLayout!!,
+            object : BluetoothConnectScene.BluetoothConnectClickListener {
+                override fun onHostGame() {
+                }
+
+                override fun onSearchGame() {
+                }
+            })
+        bluetoothConnectScene.initScene()
+        return bluetoothConnectScene
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        btManager.stopDiscovery(this@MainActivity)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        when (requestCode) {
+            btManager.requestCodeEnableBT -> {
+                if (resultCode == RESULT_OK) {
+                    Log.d("bt", "its on now")
+                }
+            }
+        }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        when (requestCode) {
+            btManager.requestCodePermissionBT -> {
+                // If request is cancelled, the result arrays are empty.
+                if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
+                    ToastDialog(this, "Yay").show()
+                    backgroundCanvas?.showErrorTint()
+                } else {
+                    ToastDialog(this, "Bluetooth permission denied").show()
+                    backgroundCanvas?.showErrorTint()
+                }
+                return
+            }
+            // Add other 'when' lines to check for other
+            // permissions this app might request.
+            else -> {
+                // Ignore all other requests.
+            }
+        }
+    }
+
 
     private fun playGameHuman(): GameScene {
         backgroundCanvas?.computerGameStart()
@@ -163,7 +228,7 @@ class MainActivity : AppCompatActivity() {
     private fun correctBackgroundTint() {
         if (sceneStack.peek().sceneType != SceneType.GAME) {
             // TODO: handle better based on game type
-            backgroundCanvas?.computerGameEnd()
+            backgroundCanvas?.normalTint()
         }
 
     }
