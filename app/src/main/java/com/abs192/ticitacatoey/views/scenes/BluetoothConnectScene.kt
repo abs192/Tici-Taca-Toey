@@ -1,20 +1,20 @@
 package com.abs192.ticitacatoey.views.scenes
 
-import android.app.Activity
-import android.os.Handler
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.Button
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.abs192.ticitacatoey.MainActivity
 import com.abs192.ticitacatoey.R
-import com.abs192.ticitacatoey.ToastDialog
-import com.abs192.ticitacatoey.bluetooth.BTManager
+import com.abs192.ticitacatoey.views.dialogs.ToastDialog
+import com.abs192.ticitacatoey.bluetooth.BTService
 import com.abs192.ticitacatoey.views.AnimatorUtil
+import com.abs192.ticitacatoey.views.dialogs.BTHostDialog
+import com.abs192.ticitacatoey.views.dialogs.BTSearchDialog
 
 class BluetoothConnectScene(
-    activity: MainActivity,
-    btManager: BTManager,
+    private val activity: MainActivity,
+    private val btService: BTService,
     layoutInflater: LayoutInflater,
     mainLayout: ConstraintLayout,
     var listener: BluetoothConnectClickListener
@@ -23,17 +23,20 @@ class BluetoothConnectScene(
     private var bluetoothConnectScene: View? = null
     private var bluetoothConnectHostButton: Button? = null
     private var bluetoothConnectSearchButton: Button? = null
-    private var isBTEnabled = false
 
     init {
-        if (!btManager.isSupportedOnDevice()) {
-            ToastDialog(activity, "Bluetooth is not supported on this device").show()
+        btService.onStart()
+        if (!btService.isSupportedOnDevice()) {
+            ToastDialog(
+                activity,
+                "Bluetooth is not supported on this device"
+            ).show()
             activity.backgroundCanvas?.showErrorTint()
         } else {
             activity.backgroundCanvas?.showBluetoothTint()
-            btManager.requestPermissions(activity)
+            btService.requestPermissions()
         }
-        btManager.enableBT(activity)
+        btService.showEnableDialog()
     }
 
     override fun initScene() {
@@ -47,15 +50,16 @@ class BluetoothConnectScene(
         fadeIn()
 
         bluetoothConnectHostButton?.setOnClickListener {
-
+            BTHostDialog(activity, btService).show()
         }
 
-        bluetoothConnectHostButton?.setOnClickListener {
-
+        bluetoothConnectSearchButton?.setOnClickListener {
+            BTSearchDialog(activity, btService).show()
         }
     }
 
     override fun backPressed() {
+        btService.onStop()
         fadeOut()
         mainLayout.removeView(bluetoothConnectScene)
     }

@@ -12,6 +12,7 @@ import android.view.View
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
 import com.abs192.ticitacatoey.R
+import com.abs192.ticitacatoey.Store
 import com.abs192.ticitacatoey.Utils
 import java.util.*
 import kotlin.math.roundToInt
@@ -19,6 +20,7 @@ import kotlin.math.roundToInt
 class BackgroundCanvas(context: Context, attributeSet: AttributeSet?) :
     View(context, attributeSet) {
 
+    private lateinit var theme: Store.Theme
     private val baseSpeed = 200
     private val xoCount = 35
     private val randomSeed = 1994L
@@ -266,12 +268,12 @@ class BackgroundCanvas(context: Context, attributeSet: AttributeSet?) :
     }
 
     fun computerGameStart() {
-        startZoomIn()
+//        startZoomIn()
         setDrawableTints("#00AB00", "#00AB00")
     }
 
     fun normalTint() {
-        startZoomOut()
+//        startZoomOut()
         setDrawableTints("#EEEEEE", "#EEEEEE")
     }
 
@@ -281,5 +283,24 @@ class BackgroundCanvas(context: Context, attributeSet: AttributeSet?) :
 
     fun showBluetoothTint() {
         setDrawableTints("#287AA9", "#287AA9")
+    }
+
+    fun setTheme(theme: Store.Theme) {
+        this.theme = theme
+        val backgroundColor: Int
+        val drawableColor: Int
+        when (theme) {
+            Store.Theme.DARK -> {
+                backgroundColor = Color.BLACK
+                drawableColor = Color.WHITE
+            }
+            Store.Theme.LIGHT -> {
+                backgroundColor = Color.WHITE
+                drawableColor = Color.BLACK
+            }
+        }
+        setBackgroundColor(backgroundColor)
+        setDrawableTints(drawableColor, drawableColor)
+
     }
 }

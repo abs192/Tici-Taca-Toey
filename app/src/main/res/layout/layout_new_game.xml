@@ -17,7 +17,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:text="Play vs"
-        android:textColor="#EEE"
+        android:textColor="?colorText"
         android:textSize="30dp"
         android:textStyle="bold" />
 
@@ -34,7 +34,7 @@
             android:layout_margin="8dp"
             android:background="@drawable/button_background"
             android:text="Computer"
-            android:textColor="#EEE" />
+            android:textColor="?colorText" />
 
         <Button
             android:id="@+id/newGameButtonHuman"
@@ -43,6 +43,17 @@
             android:layout_margin="8dp"
             android:background="@drawable/button_background"
             android:text="Human"
-            android:textColor="#EEE" />
+            android:textColor="?colorText" />
     </LinearLayout>
+
+    <Button
+        android:id="@+id/newGameButtonSettings"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_margin="8dp"
+        android:background="@drawable/button_background"
+        android:text="Settings"
+        android:textColor="?colorText" />
+
 </LinearLayout>

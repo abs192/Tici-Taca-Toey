@@ -1,13 +1,15 @@
 package com.abs192.ticitacatoey
 
+import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothDevice
+import android.content.BroadcastReceiver
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
 import android.view.Window
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
-import com.abs192.ticitacatoey.bluetooth.BTManager
+import com.abs192.ticitacatoey.bluetooth.BTService
 import com.abs192.ticitacatoey.game.ComputerPlayer
 import com.abs192.ticitacatoey.game.DefaultColorSets
 import com.abs192.ticitacatoey.game.GameManager
@@ -22,13 +24,23 @@ class MainActivity : AppCompatActivity() {
     var backgroundCanvas: BackgroundCanvas? = null
     private var mainLayout: ConstraintLayout? = null
 
-    private lateinit var currentViewState: SceneType
     private var sceneStack: Stack<TTTScene> = Stack()
 
+    private var btService: BTService? = null
+
     private var player = Player("", "")
-    private val btManager = BTManager()
+
+    private var discoveryCallback: BTService.DiscoveryCallback? = null
+
+    private val store = Store(this)
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        if (store.getBackgroundTheme() == Store.Theme.LIGHT) {
+            setTheme(R.style.LightAppTheme)
+        } else {
+
+            setTheme(R.style.DarkAppTheme)
+        }
         super.onCreate(savedInstanceState)
         requestWindowFeature(Window.FEATURE_NO_TITLE)
         supportActionBar?.hide()
@@ -37,12 +49,15 @@ class MainActivity : AppCompatActivity() {
         mainLayout = findViewById(R.id.main_layout)
         backgroundCanvas = findViewById(R.id.backgroundCanvas)
 
+        backgroundCanvas?.setTheme(store.getBackgroundTheme())
+
         // check scenes
         if (sceneStack.isEmpty()) {
             sceneStack.add(newGameScene())
         } else {
             //loadScene
         }
+        btService = BTService(this)
     }
 
     private fun newGameScene(): NewGameScene {
@@ -58,9 +73,34 @@ class MainActivity : AppCompatActivity() {
                 override fun onHumanClicked() {
                     sceneStack.add(playHumanScene())
                 }
+
+                override fun onSettingsClicked() {
+                    sceneStack.add(settingsScene())
+                }
             })
         newGameScene.initScene()
         return newGameScene
+    }
+
+    private fun settingsScene(): SettingsScene {
+        val settingsScene = SettingsScene(
+            this,
+            store,
+            layoutInflater,
+            mainLayout!!,
+            object : SettingsScene.SettingsClickListener {
+                override fun onThemeLightClicked() {
+                    recreate()
+                    backgroundCanvas?.setTheme(Store.Theme.LIGHT)
+                }
+
+                override fun onThemeDarkClicked() {
+                    recreate()
+                    backgroundCanvas?.setTheme(Store.Theme.DARK)
+                }
+            })
+        settingsScene.initScene()
+        return settingsScene
     }
 
     private fun playComputerScene(): PlayComputerScene {
@@ -93,7 +133,7 @@ class MainActivity : AppCompatActivity() {
                 "a",
                 player,
                 ComputerPlayer(difficulty),
-                DefaultColorSets().computerColorSet
+                DefaultColorSets(this).computerColorSet
             )
         )
         gameScene.initScene()
@@ -126,7 +166,7 @@ class MainActivity : AppCompatActivity() {
     private fun bluetoothConnectScene(): BluetoothConnectScene {
         val bluetoothConnectScene = BluetoothConnectScene(
             this,
-            btManager,
+            btService!!,
             layoutInflater,
             mainLayout!!,
             object : BluetoothConnectScene.BluetoothConnectClickListener {
@@ -140,20 +180,11 @@ class MainActivity : AppCompatActivity() {
         return bluetoothConnectScene
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        btManager.stopDiscovery(this@MainActivity)
-    }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        when (requestCode) {
-            btManager.requestCodeEnableBT -> {
-                if (resultCode == RESULT_OK) {
-                    Log.d("bt", "its on now")
-                }
-            }
-        }
+        Log.d(javaClass.simpleName, "activity result $requestCode $resultCode")
+        btService!!.onActivityResult(requestCode, resultCode, data)
     }
 
     override fun onRequestPermissionsResult(
@@ -162,24 +193,7 @@ class MainActivity : AppCompatActivity() {
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        when (requestCode) {
-            btManager.requestCodePermissionBT -> {
-                // If request is cancelled, the result arrays are empty.
-                if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
-                    ToastDialog(this, "Yay").show()
-                    backgroundCanvas?.showErrorTint()
-                } else {
-                    ToastDialog(this, "Bluetooth permission denied").show()
-                    backgroundCanvas?.showErrorTint()
-                }
-                return
-            }
-            // Add other 'when' lines to check for other
-            // permissions this app might request.
-            else -> {
-                // Ignore all other requests.
-            }
-        }
+        btService!!.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
 
 
@@ -191,7 +205,7 @@ class MainActivity : AppCompatActivity() {
                 "a",
                 player,
                 Player("p2", "p2"),
-                DefaultColorSets().computerColorSet
+                DefaultColorSets(this).computerColorSet
             )
         )
         gameScene.initScene()
@@ -201,6 +215,12 @@ class MainActivity : AppCompatActivity() {
     override fun onPause() {
         super.onPause()
         backgroundCanvas?.pause()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+//        unregisterReceiver(bluetoothScanReceiver)
     }
 
     override fun onResume() {
@@ -230,7 +250,46 @@ class MainActivity : AppCompatActivity() {
             // TODO: handle better based on game type
             backgroundCanvas?.normalTint()
         }
-
     }
 
+    fun setDiscoveryCallback(discoveryCallback: BTService.DiscoveryCallback) {
+        this.discoveryCallback = discoveryCallback
+    }
+
+    val bluetoothScanReceiver: BroadcastReceiver? = object : BroadcastReceiver() {
+        override fun onReceive(context: android.content.Context?, intent: Intent?) {
+            val action = intent!!.action
+            Log.d(javaClass.simpleName, "scan receiver onReceive")
+            Log.d(javaClass.simpleName, "action " + action)
+            if (action != null) {
+                when (action) {
+                    BluetoothAdapter.ACTION_STATE_CHANGED -> {
+                        val state =
+                            intent.getIntExtra(
+                                BluetoothAdapter.EXTRA_STATE,
+                                BluetoothAdapter.ERROR
+                            )
+                        if (state == BluetoothAdapter.STATE_OFF) {
+                            if (discoveryCallback != null) {
+//                                discoveryCallback?.onError(DiscoveryError.BLUETOOTH_DISABLED)
+                                discoveryCallback?.onError()
+                            }
+                        }
+                    }
+                    BluetoothAdapter.ACTION_DISCOVERY_STARTED ->
+                        discoveryCallback?.onDiscoveryStarted()
+                    BluetoothAdapter.ACTION_DISCOVERY_FINISHED -> {
+                        context!!.unregisterReceiver(this)
+                        discoveryCallback?.onDiscoveryFinished()
+                    }
+                    BluetoothDevice.ACTION_FOUND -> {
+                        val device =
+                            intent.getParcelableExtra<BluetoothDevice>(BluetoothDevice.EXTRA_DEVICE)
+                        device?.let { discoveryCallback?.onDeviceFound(device) }
+                    }
+                }
+            }
+
+        }
+    }
 }

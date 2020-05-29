@@ -1,4 +1,4 @@
-package com.abs192.ticitacatoey
+package com.abs192.ticitacatoey.views.dialogs
 
 import android.app.Dialog
 import android.content.Context
@@ -7,8 +7,9 @@ import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.Window
 import android.widget.TextView
+import com.abs192.ticitacatoey.R
 
-class ToastDialog(context: Context, val toastText: String) : Dialog(context) {
+class ToastDialog(context: Context, private val toastText: String) : Dialog(context) {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

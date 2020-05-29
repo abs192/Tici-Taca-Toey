@@ -6,9 +6,23 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+        <item name="colorBackground">@color/colorBackground</item>
+        <item name="colorText">@color/colorText</item>
         <item name="android:windowTranslucentStatus">true</item>
-
     </style>
+
+    <style name="LightAppTheme" parent="AppTheme">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/lightColorPrimary</item>
+        <item name="colorPrimaryDark">@color/lightColorPrimaryDark</item>
+        <item name="colorAccent">@color/lightColorAccent</item>
+        <item name="colorBackground">@color/lightColorBackground</item>
+        <item name="colorText">@color/lightColorText</item>
+        <item name="android:windowTranslucentStatus">true</item>
+    </style>
+
+    <style name="DarkAppTheme" parent="AppTheme" />
+
     <style name="AppTheme.NoActionBar">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
@@ -18,4 +32,7 @@
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
+    <style name="SwitchTextAppearance" parent="@android:style/TextAppearance.Holo.Small">
+        <item name="android:textColor">?colorText</item>
+    </style>
 </resources>

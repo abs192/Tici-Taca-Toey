@@ -17,7 +17,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:text="Difficulty"
-        android:textColor="#EEE"
+        android:textColor="?colorText"
         android:textSize="30dp"
         android:textStyle="bold" />
 
@@ -34,7 +34,7 @@
             android:layout_margin="8dp"
             android:background="@drawable/button_background"
             android:text="Easy"
-            android:textColor="#EEE" />
+            android:textColor="?colorText" />
 
         <Button
             android:id="@+id/newGameButtonComputerHard"
@@ -43,7 +43,7 @@
             android:layout_margin="8dp"
             android:background="@drawable/button_background"
             android:text="Hard"
-            android:textColor="#EEE" />
+            android:textColor="?colorText" />
 
         <Button
             android:id="@+id/newGameButtonComputerImpossible"
@@ -52,6 +52,6 @@
             android:layout_margin="8dp"
             android:background="@drawable/button_background"
             android:text="Impossible"
-            android:textColor="#EEE" />
+            android:textColor="?colorText" />
     </LinearLayout>
 </LinearLayout>

@@ -2,7 +2,6 @@ package com.abs192.ticitacatoey.views.canvas
 
 import android.animation.PropertyValuesHolder
 import android.animation.ValueAnimator
-import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
@@ -17,64 +16,81 @@ import com.abs192.ticitacatoey.game.*
 import com.abs192.ticitacatoey.types.GameInfo
 import java.util.*
 
+
 class GridCanvas(context: Context, attributeSet: AttributeSet?) : View(context, attributeSet),
     PostMoveEventListener {
 
+
     private val utils = Utils()
-
-    var displayWidth: Int = context.resources?.displayMetrics?.widthPixels!!
-    var displayHeight: Int = context.resources?.displayMetrics?.heightPixels!!
-    private val gridPaint = Paint()
-
-    private val squarePaintNormal = Paint()
-    private val squarePaintSelected = Paint()
-    private val squarePaintWin = Paint()
-    private val squarePaintDraw = Paint()
-    private var animator: ValueAnimator = ValueAnimator()
-
-    private var propertyDividerSize = "anim_property_divider_size"
-
-    private var dividerSize = 15
-    private val finalDividerSize = 15
-
-    private var outerRect = Rect()
-    private var topRect = Rect()
-    private var bottomRect = Rect()
-    private var bottomRectWin = Rect()
-    private var bottomRectDraw = Rect()
-    private var bottomRectLoss = Rect()
-
-    private val mXDrawable = ContextCompat.getDrawable(context, R.drawable.x_shape)!!
-
-    private val mODrawable = ContextCompat.getDrawable(context, R.drawable.o_shape)!!
-    private val dividers = arrayListOf<RectF>()
-
-    private var squareRects = arrayListOf<Rect>()
-    private val dividerColors = mutableListOf(
-        Color.parseColor("#ABABAB"),
-        Color.parseColor("#9A9A9A"),
-        Color.parseColor("#898989"),
-        Color.parseColor("#787878")
-    )
-
-    private var selectedSquare = Point(-1, -1)
-
-    private var winSquares = arrayListOf<Point>()
-    private var squareSize = (displayWidth - 2 * dividerSize) / 3
 
     private lateinit var game: Game
     private lateinit var gameInfo: GameInfo
-
     private lateinit var moveInputListener: MoveInputListener
+
+    private var displayWidth: Int = context.resources?.displayMetrics?.widthPixels!!
+    private var displayHeight: Int = context.resources?.displayMetrics?.heightPixels!!
+
+    private var animator: ValueAnimator = ValueAnimator()
+    private var propertyDividerSize = "anim_property_divider_size"
+
+
+    private var dividerSize = 15
+    private val finalDividerSize = 15
+    private var squareSize = (displayWidth - 2 * dividerSize) / 3
+
+    private val bannerSize = displayHeight / 5
+    private val bannerPadding = 20
+
+    private val mXDrawable = ContextCompat.getDrawable(context, R.drawable.x_shape)!!
+    private val mODrawable = ContextCompat.getDrawable(context, R.drawable.o_shape)!!
+
+    private val dividers = arrayListOf<RectF>()
+    private var squareRects = arrayListOf<Rect>()
+
+    private val dividerColors = mutableListOf<Int>()
+
+    private var selectedSquare = Point(-1, -1)
+    private var winSquares = arrayListOf<Point>()
+
     private var bannerText = ""
     private var bannerSubText = ""
+    private var isAgainstComputer = false
+
+    private var didYouWin = false
+    private var didYouLose = false
+    private var didYouDraw = false
+
+    /**
+     *  PAINT objects
+     */
+    private val gridPaint = Paint()
+    private val gridBackgroundPaint = Paint()
+    private val squarePaintNormal = Paint()
+    private val squarePaintSelected = Paint()
     private val bannerTextNormalPaint = Paint()
     private val bannerSubTextNormalPaint = Paint()
     private val bannerBottomTextWinPaint = Paint()
     private val bannerBottomTextLosePaint = Paint()
     private val bannerBottomTextDrawPaint = Paint()
 
-    private var isAgainstComputer = false
+    private val opponentBannerTextPaint = Paint()
+    private val opponentBannerBackgroundPaint = Paint()
+    private val opponentBannerEdgePaint = Paint()
+
+    private val yourBannerTextPaint = Paint()
+    private val yourBannerBackgroundPaint = Paint()
+    private val yourBannerEdgePaint = Paint()
+
+    /**
+     * Rect objects
+     */
+    private var outerRect = Rect()
+    private var topRect = Rect()
+    private var bottomRect = Rect()
+    private var yourBannerRect = Rect()
+    private var youAreDrawableRect = Rect()
+    private var opponentBannerRect = Rect()
+    private var scoreBoardRect = Rect()
 
     init {
         topRect = Rect(
@@ -97,23 +113,24 @@ class GridCanvas(context: Context, attributeSet: AttributeSet?) : View(context, 
             displayHeight
         )
 
-        bottomRectWin = Rect(
-            0,
-            (displayHeight / 2) + (displayWidth / 2),
-            displayWidth / 3,
-            displayHeight
+        opponentBannerRect = Rect(
+            bannerPadding,
+            0 - bannerPadding,
+            displayWidth - bannerPadding,
+            bannerSize
         )
-        bottomRectDraw = Rect(
-            displayWidth / 3,
-            (displayHeight / 2) + (displayWidth / 2),
-            2 * displayWidth / 3,
-            displayHeight
+        yourBannerRect = Rect(
+            bannerPadding,
+            displayHeight - bannerSize,
+            displayWidth - bannerPadding,
+            displayHeight + bannerSize
         )
-        bottomRectLoss = Rect(
-            2 * displayWidth / 3,
-            (displayHeight / 2) + (displayWidth / 2),
-            displayWidth,
-            displayHeight
+
+        youAreDrawableRect = Rect(
+            displayWidth / 2 - squareSize / 2,
+            displayHeight - bannerSize,
+            displayWidth / 2 + squareSize / 2,
+            displayHeight - bannerSize + squareSize
         )
 
         for (i in 0 until 3) {
@@ -135,12 +152,10 @@ class GridCanvas(context: Context, attributeSet: AttributeSet?) : View(context, 
         dividerSize = finalDividerSize
         initDividers()
         dividerColors.shuffle()
+        gridPaint.strokeWidth = dividerSize.toFloat()
 
         squarePaintNormal.color = Color.WHITE
         squarePaintNormal.alpha = 0
-
-        squarePaintSelected.color = Color.BLUE
-        squarePaintSelected.alpha = 100
 
         bannerTextNormalPaint.color = Color.GRAY
         bannerTextNormalPaint.strokeMiter = 2F
@@ -151,13 +166,24 @@ class GridCanvas(context: Context, attributeSet: AttributeSet?) : View(context, 
         bannerSubTextNormalPaint.color = Color.CYAN
         bannerSubTextNormalPaint.textAlign = Paint.Align.CENTER
         bannerSubTextNormalPaint.textSize = topRect.width() / 20F
+
     }
 
     fun initColors(colorSet: ColorSet) {
-//        dividerColors
+        dividerColors.clear()
         for (i in 0 until 4) {
-            dividerColors[i] = Color.parseColor(utils.shadeColor(colorSet.dividerColor, i * -10))
+            dividerColors.add(Color.parseColor(utils.shadeColor(colorSet.dividerColor, i * -10)))
         }
+        gridPaint.style = Paint.Style.FILL
+
+        gridBackgroundPaint.color = colorSet.backgroundColor
+        gridBackgroundPaint.alpha = 150
+        gridBackgroundPaint.strokeWidth = dividerSize.toFloat()
+        gridBackgroundPaint.style = Paint.Style.FILL
+
+        squarePaintSelected.color = colorSet.accentColor
+        squarePaintSelected.alpha = 100
+
         bannerTextNormalPaint.color = colorSet.bannerTextColor
         bannerSubTextNormalPaint.color = colorSet.bannerSubTextColor
 //            Color.parseColor(utils.shadeColor(colorSet.bannerTextColor, -10))
@@ -173,6 +199,66 @@ class GridCanvas(context: Context, attributeSet: AttributeSet?) : View(context, 
         bannerBottomTextDrawPaint.color = colorSet.gameDrawSquareColor
         bannerBottomTextDrawPaint.textAlign = Paint.Align.CENTER
         bannerBottomTextDrawPaint.textSize = topRect.width() / 20F
+
+        yourBannerTextPaint.color = colorSet.defaultTextColor
+        yourBannerTextPaint.textAlign = Paint.Align.CENTER
+        yourBannerTextPaint.textSize = yourBannerRect.width() / 20F
+
+
+        yourBannerBackgroundPaint.color =
+            Color.parseColor(utils.shadeColor(colorSet.playerBaseColor, -20))
+
+        val yourBannerBackgroundColor1 =
+            Color.parseColor(utils.shadeColor(colorSet.backgroundColor, -30))
+        val yourBannerRadialGradient = RadialGradient(
+            yourBannerRect.right / 2F,
+//            yourBannerRect.bottom - (yourBannerRect.height() / 2F),
+            yourBannerRect.bottom.toFloat(),
+            yourBannerRect.left / 2F,
+            intArrayOf(yourBannerBackgroundColor1, Color.WHITE),
+//            intArrayOf(Color.GRAY, Color.WHITE),
+//            intArrayOf(yourBannerBackgroundColor2, yourBannerBackgroundColor1),
+            null,
+            Shader.TileMode.MIRROR
+        )
+        yourBannerBackgroundPaint.shader = yourBannerRadialGradient
+        yourBannerBackgroundPaint.style = Paint.Style.FILL
+        yourBannerBackgroundPaint.alpha = 100
+
+        yourBannerEdgePaint.color =
+            Color.parseColor(utils.shadeColor(colorSet.foregroundColor, -20))
+        yourBannerEdgePaint.style = Paint.Style.STROKE
+        yourBannerEdgePaint.strokeWidth = 15F
+        yourBannerEdgePaint.alpha = 150
+
+        opponentBannerTextPaint.color = colorSet.defaultTextColor
+        opponentBannerTextPaint.textAlign = Paint.Align.CENTER
+        opponentBannerTextPaint.textSize = opponentBannerRect.width() / 20F
+
+        opponentBannerBackgroundPaint.color =
+            Color.parseColor(utils.shadeColor(colorSet.opponentBaseColor, -20))
+
+        val oppBannerBackgroundColor1 =
+            Color.parseColor(utils.shadeColor(colorSet.foregroundColor, -20))
+        val oppBannerBackgroundColor2 =
+            Color.parseColor(utils.shadeColor(colorSet.opponentBaseColor, 20))
+        val oppBannerRadialGradient = RadialGradient(
+            opponentBannerRect.right / 2F,
+            opponentBannerRect.top.toFloat(),
+            opponentBannerRect.left / 2F,
+            intArrayOf(oppBannerBackgroundColor1, oppBannerBackgroundColor2),
+            null,
+            Shader.TileMode.MIRROR
+        )
+        opponentBannerBackgroundPaint.shader = oppBannerRadialGradient
+        opponentBannerBackgroundPaint.style = Paint.Style.FILL
+        opponentBannerBackgroundPaint.alpha = 100
+
+        opponentBannerEdgePaint.color =
+            Color.parseColor(utils.shadeColor(colorSet.opponentBaseColor, 20))
+        opponentBannerEdgePaint.style = Paint.Style.STROKE
+        opponentBannerEdgePaint.strokeWidth = 15F
+        opponentBannerEdgePaint.alpha = 150
 
     }
 
@@ -236,14 +322,83 @@ class GridCanvas(context: Context, attributeSet: AttributeSet?) : View(context, 
 
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
+        drawBoard(canvas)
+        drawXOs(canvas)
+        drawSquares(canvas)
+//        drawBanner(canvas)
+//        drawBottomBanners(canvas)
+        drawYourBanner(canvas)
+        drawOpponentBanner(canvas)
+    }
+
+    private fun drawBoard(canvas: Canvas?) {
+        gridBackgroundPaint.style = Paint.Style.FILL
+        canvas?.drawRoundRect(RectF(outerRect), 15F, 15F, gridBackgroundPaint)
+        gridBackgroundPaint.style = Paint.Style.STROKE
+        canvas?.drawRoundRect(RectF(outerRect), 15F, 15F, gridBackgroundPaint)
         dividers.forEachIndexed { idx, it ->
             gridPaint.color = dividerColors[idx]
             canvas?.drawRoundRect(it, 5F, 5F, gridPaint)
         }
-        drawXOs(canvas)
-        drawSquares(canvas)
-        drawBanner(canvas)
-        drawBottomBanners(canvas)
+    }
+
+    private fun drawOpponentBanner(canvas: Canvas?) {
+        canvas?.drawRoundRect(
+            RectF(opponentBannerRect), 15F, 15F, opponentBannerBackgroundPaint
+        )
+
+        if (game.getToMove() == gameInfo.player2.xo) {
+            canvas?.drawRoundRect(
+                RectF(opponentBannerRect), 15F, 15F, opponentBannerEdgePaint
+            )
+        }
+        val rect = Rect(
+            opponentBannerRect.left + bannerPadding,
+            2 * opponentBannerRect.bottom / 3,
+            opponentBannerRect.right / 2,
+            opponentBannerRect.bottom - bannerPadding
+        )
+        canvas?.drawText(
+            "${gameInfo.player2.name} [${gameInfo.player2.playerId}]", rect.centerX().toFloat(),
+            rect.centerY().toFloat(), opponentBannerTextPaint
+        )
+    }
+
+    private fun drawYourBanner(canvas: Canvas?) {
+        canvas?.drawRoundRect(
+            RectF(yourBannerRect), 15F, 15F, yourBannerBackgroundPaint
+        )
+
+        if (game.getToMove() == gameInfo.player1.xo) {
+            canvas?.drawRoundRect(
+                RectF(yourBannerRect), 15F, 15F, yourBannerEdgePaint
+            )
+        }
+        mXDrawable.alpha = 255
+        mODrawable.alpha = 255
+        val rectBounds = Rect(
+            youAreDrawableRect.left + (youAreDrawableRect.width() / 3),
+            youAreDrawableRect.top + (youAreDrawableRect.height() / 3),
+            youAreDrawableRect.right - (youAreDrawableRect.width() / 3),
+            youAreDrawableRect.bottom - (youAreDrawableRect.height() / 3)
+        )
+        val textRect = Rect(
+            yourBannerRect.left,
+            rectBounds.top - yourBannerTextPaint.textSize.toInt(),
+            yourBannerRect.right,
+            rectBounds.top
+        )
+        canvas?.drawText(
+            "You are", textRect.centerX().toFloat(),
+            textRect.centerY().toFloat(), yourBannerTextPaint
+        )
+        if (gameInfo.player1.xo == "o") {
+            mODrawable.bounds = rectBounds
+            canvas?.let { mODrawable.draw(it) }
+        } else if (gameInfo.player1.xo == "x") {
+            mXDrawable.bounds = rectBounds
+            canvas?.let { mXDrawable.draw(it) }
+        }
     }
 
     private fun drawBottomBanners(canvas: Canvas?) {
@@ -316,12 +471,12 @@ class GridCanvas(context: Context, attributeSet: AttributeSet?) : View(context, 
         squareRects.forEachIndexed { index, rect ->
             canvas?.drawRect(rect, squarePaintNormal)
         }
-//        if (selectedSquare.x != -1 && selectedSquare.y != -1) {
-//            canvas?.drawRect(
-//                squareRects[(selectedSquare.x * 3) + (selectedSquare.y % 3)],
-//                squarePaintSelected
-//            )
-//        }
+        if (selectedSquare.x != -1 && selectedSquare.y != -1) {
+            canvas?.drawRect(
+                squareRects[(selectedSquare.y * 3) + (selectedSquare.x % 3)],
+                squarePaintSelected
+            )
+        }
     }
 
     private fun drawXOs(canvas: Canvas?) {
@@ -364,14 +519,20 @@ class GridCanvas(context: Context, attributeSet: AttributeSet?) : View(context, 
         }
     }
 
-    @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent?): Boolean {
-        if (event?.action == MotionEvent.ACTION_UP) {
-            val p = getBoardPos(event.x, event.y)
-            selectedSquare = Point(-1, -1)
-            invalidate()
-        } else if (event?.action == MotionEvent.ACTION_DOWN) {
+        Log.d(javaClass.simpleName, "onTouch action ${event?.actionMasked} ${event?.x} {$event?.y}")
+        if (event?.action == MotionEvent.ACTION_DOWN) {
             selectedSquare = getBoardPos(event.x, event.y)
+            invalidate()
+            return true
+        } else if (event?.action == MotionEvent.ACTION_MOVE) {
+            val newSquare = getBoardPos(event.x, event.y)
+            if (newSquare != selectedSquare) {
+                selectedSquare = Point(-1, -1)
+            }
+            invalidate()
+            return true
+        } else if (event?.action == MotionEvent.ACTION_UP) {
             if (selectedSquare.x != -1 && selectedSquare.y != -1) {
                 Log.d(javaClass.simpleName, "yo moveInput $selectedSquare")
 
@@ -392,6 +553,7 @@ class GridCanvas(context: Context, attributeSet: AttributeSet?) : View(context, 
                         selectedSquare.y
                     )
                 }
+                selectedSquare = Point(-1, -1)
             }
             invalidate()
             return true
@@ -442,6 +604,7 @@ class GridCanvas(context: Context, attributeSet: AttributeSet?) : View(context, 
                 "Starting"
             }
         }
+//        winAnimation()
         bannerSubText = "Restarting game..."
     }
 
@@ -449,13 +612,15 @@ class GridCanvas(context: Context, attributeSet: AttributeSet?) : View(context, 
         game: Game,
         gameInfo: GameInfo
     ) {
+        this.didYouWin = false
+        this.didYouDraw = false
+        this.didYouLose = false
         this.game = game
         this.gameInfo = gameInfo
 
         if (gameInfo.player2 is ComputerPlayer) {
             isAgainstComputer = true
         }
-        initBannerText()
         initXOPlayerTints()
         invalidate()
     }
@@ -464,7 +629,6 @@ class GridCanvas(context: Context, attributeSet: AttributeSet?) : View(context, 
     override fun moveDone(x: Int, y: Int, xo: String) {
         bannerText = game.getToMove().toUpperCase(Locale.getDefault()) + " to move"
         bannerSubText = "You are ${gameInfo.player1.xo}"
-        initBannerText()
         invalidate()
     }
 
@@ -473,14 +637,5 @@ class GridCanvas(context: Context, attributeSet: AttributeSet?) : View(context, 
             "Not your move.. you are ${gameInfo.player1.xo.toUpperCase(Locale.getDefault())}"
         invalidate()
 
-    }
-
-    private fun initBannerText() {
-//        bannerSubText = if (gameInfo.player1.xo == game.getToMove())
-//            "Your move"
-//        else
-//            ""
-        bannerText = game.getToMove().toUpperCase(Locale.getDefault()) + " to move"
-        bannerSubText = "You are ${gameInfo.player1.xo.toUpperCase(Locale.getDefault())}"
     }
 }

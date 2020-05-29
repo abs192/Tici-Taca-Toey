@@ -17,7 +17,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:text="Bluetooth"
-        android:textColor="#EEE"
+        android:textColor="?colorText"
         android:textSize="25dp"
         android:textStyle="bold" />
 
@@ -34,7 +34,7 @@
             android:layout_margin="8dp"
             android:background="@drawable/button_background"
             android:text="Host"
-            android:textColor="#EEE" />
+            android:textColor="?colorText" />
 
         <Button
             android:id="@+id/bluetoothConnectSearchButton"
@@ -43,7 +43,7 @@
             android:layout_margin="8dp"
             android:background="@drawable/button_background"
             android:text="Search"
-            android:textColor="#EEE" />
+            android:textColor="?colorText" />
 
     </LinearLayout>
 </LinearLayout>

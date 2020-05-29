@@ -18,6 +18,7 @@ class NewGameScene(
     private var newGameLayout: View? = null
     private var buttonPlayComputer: Button? = null
     private var buttonPlayHuman: Button? = null
+    private var buttonSettings: Button? = null
 
     override fun initScene() {
         newGameLayout = layoutInflater.inflate(R.layout.layout_new_game, null)
@@ -25,6 +26,7 @@ class NewGameScene(
         fadeIn()
         buttonPlayComputer = newGameLayout?.findViewById(R.id.newGameButtonComputer)
         buttonPlayHuman = newGameLayout?.findViewById(R.id.newGameButtonHuman)
+        buttonSettings = newGameLayout?.findViewById(R.id.newGameButtonSettings)
 
         buttonPlayComputer?.setOnClickListener {
             fadeOut()
@@ -34,6 +36,10 @@ class NewGameScene(
             fadeOut()
             listener.onHumanClicked()
         }
+        buttonSettings?.setOnClickListener {
+            fadeOut()
+            listener.onSettingsClicked()
+        }
     }
 
     override fun backPressed() {
@@ -42,23 +48,30 @@ class NewGameScene(
     }
 
     override fun fadeIn() {
-        enableDisableViews(true, newGameLayout, buttonPlayComputer, buttonPlayHuman)
+        enableDisableViews(true, newGameLayout, buttonPlayComputer, buttonPlayHuman, buttonSettings)
         animatorUtil.fadeIn(newGameLayout!!, AnimatorUtil.Duration.LONG, null)
     }
 
     override fun fadeInFast() {
-        enableDisableViews(true, newGameLayout, buttonPlayComputer, buttonPlayHuman)
+        enableDisableViews(true, newGameLayout, buttonPlayComputer, buttonPlayHuman, buttonSettings)
         animatorUtil.fadeIn(newGameLayout!!, AnimatorUtil.Duration.SHORT, null)
     }
 
     override fun fadeOut() {
-        enableDisableViews(false, newGameLayout, buttonPlayComputer, buttonPlayHuman)
+        enableDisableViews(
+            false,
+            newGameLayout,
+            buttonPlayComputer,
+            buttonPlayHuman,
+            buttonSettings
+        )
         animatorUtil.fadeOut(newGameLayout!!, AnimatorUtil.Duration.MEDIUM, null)
     }
 
     interface NewGameButtonClickListener {
         fun onComputerClicked()
         fun onHumanClicked()
+        fun onSettingsClicked()
     }
 
 }

@@ -54,7 +54,8 @@ class PlayComputerScene(
             true,
             newGameLayoutComputer,
             buttonPlayComputerEasy,
-            buttonPlayComputerEasy
+            buttonPlayComputerHard,
+            buttonPlayComputerImpossible
         )
         animatorUtil.fadeIn(newGameLayoutComputer!!, AnimatorUtil.Duration.LONG, null)
     }
@@ -65,7 +66,8 @@ class PlayComputerScene(
             true,
             newGameLayoutComputer,
             buttonPlayComputerEasy,
-            buttonPlayComputerEasy
+            buttonPlayComputerHard,
+            buttonPlayComputerImpossible
         )
         animatorUtil.fadeIn(newGameLayoutComputer!!, AnimatorUtil.Duration.SHORT, null)
     }
@@ -75,7 +77,8 @@ class PlayComputerScene(
             false,
             newGameLayoutComputer,
             buttonPlayComputerEasy,
-            buttonPlayComputerEasy
+            buttonPlayComputerHard,
+            buttonPlayComputerImpossible
         )
         animatorUtil.fadeOut(newGameLayoutComputer!!, AnimatorUtil.Duration.MEDIUM, null)
     }

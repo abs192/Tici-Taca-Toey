@@ -4,7 +4,7 @@ import android.os.Handler
 import android.util.Log
 import com.abs192.ticitacatoey.types.GameInfo
 
-class ComputerPlayer(difficulty: Difficulty) : Player("computerEZ", "EZ"),
+class ComputerPlayer(difficulty: Difficulty) : Player(difficulty.name, "Computer"),
     PostMoveEventListener {
 
     private val tag = "BEEP BOOP"
