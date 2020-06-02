@@ -29,6 +29,9 @@ class PlayHumanScene(
             newGameLayoutHuman?.findViewById(R.id.newGameButtonHumanBluetooth)
         buttonPlayHumanOnline = newGameLayoutHuman?.findViewById(R.id.newGameButtonHumanOnline)
 
+        //TODO: Remove when bt mode is fixed
+        buttonPlayHumanBluetooth?.visibility = View.GONE
+
         buttonPlayHumanLocal?.setOnClickListener {
             fadeOut()
             listener.onLocalClicked()

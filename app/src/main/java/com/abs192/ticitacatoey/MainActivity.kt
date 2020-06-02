@@ -219,7 +219,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-
+        // TODO: Unregister when bt mode is fixed
 //        unregisterReceiver(bluetoothScanReceiver)
     }
 
