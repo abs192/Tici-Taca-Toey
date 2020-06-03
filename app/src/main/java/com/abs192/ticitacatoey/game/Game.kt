@@ -9,6 +9,7 @@ class Game {
     private val rnd1 = Random(1231L)
     private val rnd2 = Random(1419L)
     private var toMove = randomMove()
+    val highlightedIndices = arrayListOf<Int>()
     var currentState: GameState = GameState.STARTING
 
     fun getToMove(): String {
@@ -79,9 +80,12 @@ class Game {
                     getXO(i, 1),
                     getXO(i, 2)
                 )
-            )
+            ) {
+                highlightedIndices.add(getPos(0, i))
+                highlightedIndices.add(getPos(1, i))
+                highlightedIndices.add(getPos(2, i))
                 return true
-
+            }
         //vert
         for (i in 0..2)
             if (checkSame(
@@ -89,14 +93,25 @@ class Game {
                     getXO(1, i),
                     getXO(2, i)
                 )
-            )
+            ) {
+                highlightedIndices.add(getPos(i, 0))
+                highlightedIndices.add(getPos(i, 1))
+                highlightedIndices.add(getPos(i, 2))
                 return true
-
+            }
         //diags
-        if (checkSame(getXO(0, 0), getXO(1, 1), getXO(2, 2)))
+        if (checkSame(getXO(0, 0), getXO(1, 1), getXO(2, 2))) {
+            highlightedIndices.add(getPos(0, 0))
+            highlightedIndices.add(getPos(1, 1))
+            highlightedIndices.add(getPos(2, 2))
             return true
-        if (checkSame(getXO(0, 2), getXO(1, 1), getXO(2, 0)))
+        }
+        if (checkSame(getXO(0, 2), getXO(1, 1), getXO(2, 0))) {
+            highlightedIndices.add(getPos(0, 2))
+            highlightedIndices.add(getPos(1, 1))
+            highlightedIndices.add(getPos(2, 0))
             return true
+        }
 
         return false
     }
@@ -112,6 +127,7 @@ class Game {
             board[index] = ""
         }
         currentState = GameState.STARTING
+        highlightedIndices.clear()
     }
 
     fun randomMove(): String {

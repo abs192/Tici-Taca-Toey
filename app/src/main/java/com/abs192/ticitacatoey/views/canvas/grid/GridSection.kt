@@ -1,6 +1,7 @@
 package com.abs192.ticitacatoey.views.canvas.grid
 
 import android.graphics.*
+import android.util.Log
 import com.abs192.ticitacatoey.game.ColorSet
 import com.abs192.ticitacatoey.game.Game
 import com.abs192.ticitacatoey.game.GameState
@@ -14,6 +15,8 @@ class GridSection(private val canvasHelper: CanvasHelper) {
     private val gridBackgroundPaint = Paint()
     private val squarePaintNormal = Paint()
     private val squarePaintSelected = Paint()
+    private val squarePaintWin = Paint()
+    private val squarePaintDraw = Paint()
 
     private var squareRects = arrayListOf<Rect>()
     private val dividers = arrayListOf<RectF>()
@@ -111,6 +114,11 @@ class GridSection(private val canvasHelper: CanvasHelper) {
         squarePaintNormal.color = Color.WHITE
         squarePaintNormal.alpha = 0
 
+        squarePaintWin.color = colorSet.primaryColor
+        squarePaintWin.alpha = 75
+
+        squarePaintDraw.color = canvasHelper.shadeColor(colorSet.foregroundColor, -20)
+        squarePaintDraw.alpha = 75
     }
 
     fun draw(
@@ -118,6 +126,17 @@ class GridSection(private val canvasHelper: CanvasHelper) {
         selectedSquare: Point,
         game: Game
     ) {
+
+        var drawEnd = false
+        var ongoing = true
+        if (game.currentState == GameState.X_WIN || game.currentState == GameState.O_WIN) {
+            drawEnd = false
+            ongoing = false
+        } else if (game.currentState == GameState.DRAW) {
+            drawEnd = true
+            ongoing = false
+        }
+
         gridBackgroundPaint.style = Paint.Style.FILL
         canvas?.drawRoundRect(RectF(outerRect), 15F, 15F, gridBackgroundPaint)
         gridBackgroundPaint.style = Paint.Style.STROKE
@@ -126,8 +145,18 @@ class GridSection(private val canvasHelper: CanvasHelper) {
             gridPaint.color = dividerColors[idx]
             canvas?.drawRoundRect(it, 5F, 5F, gridPaint)
         }
-        squareRects.forEachIndexed { _, rect ->
-            canvas?.drawRect(rect, squarePaintNormal)
+        Log.d("a", "ongoing $ongoing drawEnd $drawEnd ")
+        squareRects.forEachIndexed { index, rect ->
+            when {
+                ongoing -> canvas?.drawRect(rect, squarePaintNormal)
+                drawEnd -> canvas?.drawRect(rect, squarePaintDraw)
+                index in game.highlightedIndices -> {
+                    canvas?.drawRect(rect, squarePaintWin)
+                }
+                else -> {
+                    canvas?.drawRect(rect, squarePaintNormal)
+                }
+            }
         }
         if (selectedSquare.x != -1 && selectedSquare.y != -1) {
             canvas?.drawRect(
@@ -157,6 +186,8 @@ class GridSection(private val canvasHelper: CanvasHelper) {
 
             }
         }
+
+
     }
 
 
