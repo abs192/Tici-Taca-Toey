@@ -2,20 +2,26 @@ package com.abs192.ticitacatoey.views.canvas.grid
 
 import android.graphics.*
 import com.abs192.ticitacatoey.game.ColorSet
+import com.abs192.ticitacatoey.game.EndGameMsg
+import com.abs192.ticitacatoey.game.GameState
 import com.abs192.ticitacatoey.views.canvas.CanvasHelper
 
 class YourBanner(private val canvasHelper: CanvasHelper) {
 
     private val bannerPadding = 20
 
+    private val endGameMsg = EndGameMsg()
     private var yourBannerRect = Rect()
     private var youAreDrawableRect = Rect()
 
     private val yourBannerTextPaint = Paint()
-    private val yourBannerStatusTextPaint = Paint()
     private val yourBannerBackgroundPaint = Paint()
     private val yourBannerEdgePaint = Paint()
+    private val yourBannerEdgePaintWin = Paint()
 
+    private var winMsg = ""
+    private var drawMsg = ""
+    private var loseMsg = ""
 
     fun initRects() {
         yourBannerRect = Rect(
@@ -59,14 +65,20 @@ class YourBanner(private val canvasHelper: CanvasHelper) {
         yourBannerEdgePaint.strokeWidth = 15F
         yourBannerEdgePaint.alpha = 150
 
+        yourBannerEdgePaintWin.color = canvasHelper.shadeColor(colorSet.primaryColor, 20)
+        yourBannerEdgePaintWin.style = Paint.Style.FILL_AND_STROKE
+        yourBannerEdgePaintWin.strokeWidth = 30F
+        yourBannerEdgePaintWin.alpha = 100
+
     }
 
     fun draw(
         canvas: Canvas?,
         isItYourMove: Boolean,
-        xo: String
+        xo: String,
+        gameState: GameState,
+        statusMsg: String
     ) {
-
         canvas?.drawRoundRect(
             RectF(yourBannerRect), 15F, 15F, yourBannerBackgroundPaint
         )
@@ -90,10 +102,7 @@ class YourBanner(private val canvasHelper: CanvasHelper) {
             yourBannerRect.right,
             rectBounds.top
         )
-        canvas?.drawText(
-            "You are", textRect.centerX().toFloat(),
-            textRect.centerY().toFloat(), yourBannerTextPaint
-        )
+
         if (xo == "o") {
             canvasHelper.mODrawable.bounds = rectBounds
             canvas?.let { canvasHelper.mODrawable.draw(it) }
@@ -101,5 +110,41 @@ class YourBanner(private val canvasHelper: CanvasHelper) {
             canvasHelper.mXDrawable.bounds = rectBounds
             canvas?.let { canvasHelper.mXDrawable.draw(it) }
         }
+
+        if ((xo == "x" && gameState == GameState.X_WIN) ||
+            (xo == "o" && gameState == GameState.O_WIN)
+        ) {
+            //you win
+            canvas?.drawRoundRect(
+                RectF(yourBannerRect), 15F, 15F, yourBannerEdgePaintWin
+            )
+            canvas?.drawText(
+                winMsg, textRect.centerX().toFloat(),
+                textRect.centerY().toFloat(), yourBannerTextPaint
+            )
+        } else if ((xo == "x" && gameState == GameState.O_WIN) ||
+            (xo == "o" && gameState == GameState.X_WIN)
+        ) {
+            canvas?.drawText(
+                loseMsg, textRect.centerX().toFloat(),
+                textRect.centerY().toFloat(), yourBannerTextPaint
+            )
+        } else if (gameState == GameState.DRAW) {
+            canvas?.drawText(
+                drawMsg, textRect.centerX().toFloat(),
+                textRect.centerY().toFloat(), yourBannerTextPaint
+            )
+        } else {
+            canvas?.drawText(
+                "You are", textRect.centerX().toFloat(),
+                textRect.centerY().toFloat(), yourBannerTextPaint
+            )
+        }
+    }
+
+    fun updateStatusMsgs() {
+        winMsg = endGameMsg.win()
+        drawMsg = endGameMsg.draw()
+        loseMsg = endGameMsg.loss()
     }
 }

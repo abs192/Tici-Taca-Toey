@@ -2,6 +2,7 @@ package com.abs192.ticitacatoey.views.canvas.grid
 
 import android.graphics.*
 import com.abs192.ticitacatoey.game.ColorSet
+import com.abs192.ticitacatoey.game.GameState
 import com.abs192.ticitacatoey.views.canvas.CanvasHelper
 
 class OpponentBanner(private val canvasHelper: CanvasHelper) {
@@ -13,6 +14,7 @@ class OpponentBanner(private val canvasHelper: CanvasHelper) {
 
     private val opponentBannerBackgroundPaint = Paint()
     private val opponentBannerEdgePaint = Paint()
+    private val opponentBannerEdgePaintWin = Paint()
     private val opponentBannerTextPaint = Paint()
 
     fun initRects() {
@@ -57,6 +59,11 @@ class OpponentBanner(private val canvasHelper: CanvasHelper) {
         opponentBannerEdgePaint.style = Paint.Style.STROKE
         opponentBannerEdgePaint.strokeWidth = 15F
         opponentBannerEdgePaint.alpha = 150
+
+        opponentBannerEdgePaintWin.color = canvasHelper.shadeColor(colorSet.primaryColor, 20)
+        opponentBannerEdgePaintWin.style = Paint.Style.FILL_AND_STROKE
+        opponentBannerEdgePaintWin.strokeWidth = 30F
+        opponentBannerEdgePaintWin.alpha = 150
     }
 
     fun draw(
@@ -64,7 +71,9 @@ class OpponentBanner(private val canvasHelper: CanvasHelper) {
         isItOpponentsMove: Boolean,
         playerName: String,
         playerId: String,
-        xo: String
+        xo: String,
+        gameState: GameState,
+        statusMsg: String
     ) {
 
         canvas?.drawRoundRect(
@@ -94,12 +103,6 @@ class OpponentBanner(private val canvasHelper: CanvasHelper) {
             opponentIsDrawableRect.right - (opponentIsDrawableRect.width() / 3),
             opponentIsDrawableRect.bottom - (opponentIsDrawableRect.height() / 3)
         )
-//        val textRect = Rect(
-//            opponentIsDrawableRect.left,
-//            rectBounds.top - opponentBannerTextPaint.textSize.toInt(),
-//            opponentIsDrawableRect.right,
-//            rectBounds.top
-//        )
 
         if (xo == "o") {
             canvasHelper.mODrawable.bounds = rectBounds
@@ -107,6 +110,15 @@ class OpponentBanner(private val canvasHelper: CanvasHelper) {
         } else if (xo == "x") {
             canvasHelper.mXDrawable.bounds = rectBounds
             canvas?.let { canvasHelper.mXDrawable.draw(it) }
+        }
+
+        if ((xo == "x" && gameState == GameState.X_WIN) ||
+            (xo == "o" && gameState == GameState.O_WIN)
+        ) {
+            //you win
+            canvas?.drawRoundRect(
+                RectF(opponentBannerRect), 15F, 15F, opponentBannerEdgePaintWin
+            )
         }
     }
 }

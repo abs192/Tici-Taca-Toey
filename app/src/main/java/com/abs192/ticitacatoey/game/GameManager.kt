@@ -58,6 +58,7 @@ class GameManager(
     }
 
     override fun makeMove(playerId: String, x: Int, y: Int) {
+        game.currentState = GameState.ONGOING
         Log.d(javaClass.simpleName, "toMove ${game.getToMove()}")
 
         if (!isItPlayersTurn(playerId)) {
@@ -76,8 +77,8 @@ class GameManager(
             }
         }
 
-        var checkEnd = game.checkEnd()
-        if (checkEnd != GameState.ONGOING) {
+        game.currentState = game.checkEnd()
+        if (game.currentState != GameState.ONGOING) {
             return
         }
 
@@ -94,11 +95,12 @@ class GameManager(
             player1PostMoveInputListener?.moveRejected()
             player2PostMoveInputListener?.moveRejected()
         }
-        checkEnd = game.checkEnd()
-        if (checkEnd != GameState.ONGOING) {
-            updateScore(checkEnd)
-            player1PostMoveInputListener?.gameEnd(checkEnd)
-            player2PostMoveInputListener?.gameEnd(checkEnd)
+
+        game.currentState = game.checkEnd()
+        if (game.currentState != GameState.ONGOING) {
+            updateScore()
+            player1PostMoveInputListener?.gameEnd(game.currentState)
+            player2PostMoveInputListener?.gameEnd(game.currentState)
             // restart after 2 secs
             Handler().postDelayed({
                 game.resetBoard()
@@ -107,8 +109,8 @@ class GameManager(
         }
     }
 
-    private fun updateScore(checkEnd: GameState) {
-        when (checkEnd) {
+    private fun updateScore() {
+        when (game.currentState) {
             GameState.X_WIN ->
                 if (gameInfo.player1.xo == "x")
                     gameInfo.countWinsPlayer1++

@@ -9,6 +9,7 @@ import android.util.Log
 import android.view.Window
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
+import com.abs192.ticitacatoey.audio.AudioManager
 import com.abs192.ticitacatoey.bluetooth.BTService
 import com.abs192.ticitacatoey.game.ComputerPlayer
 import com.abs192.ticitacatoey.game.DefaultColorSets
@@ -33,6 +34,8 @@ class MainActivity : AppCompatActivity() {
     private var discoveryCallback: BTService.DiscoveryCallback? = null
 
     private val store = Store(this)
+
+    private val audioManager = AudioManager(this)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         if (store.getBackgroundTheme() == Store.Theme.LIGHT) {
@@ -127,7 +130,13 @@ class MainActivity : AppCompatActivity() {
 
     private fun playGameComputer(difficulty: ComputerPlayer.Difficulty): GameScene {
         backgroundCanvas?.computerGameStart()
-        val gameScene = GameScene(GameManager.GameMode.COMPUTER, this, layoutInflater, mainLayout!!)
+        val gameScene = GameScene(
+            GameManager.GameMode.COMPUTER,
+            audioManager,
+            this,
+            layoutInflater,
+            mainLayout!!
+        )
         gameScene.initGameInfo(
             GameInfo(
                 "a",
@@ -199,7 +208,8 @@ class MainActivity : AppCompatActivity() {
 
     private fun playGameHuman(): GameScene {
         backgroundCanvas?.computerGameStart()
-        val gameScene = GameScene(GameManager.GameMode.HUMAN, this, layoutInflater, mainLayout!!)
+        val gameScene =
+            GameScene(GameManager.GameMode.HUMAN, audioManager, this, layoutInflater, mainLayout!!)
         gameScene.initGameInfo(
             GameInfo(
                 "a",
@@ -260,7 +270,7 @@ class MainActivity : AppCompatActivity() {
         override fun onReceive(context: android.content.Context?, intent: Intent?) {
             val action = intent!!.action
             Log.d(javaClass.simpleName, "scan receiver onReceive")
-            Log.d(javaClass.simpleName, "action " + action)
+            Log.d(javaClass.simpleName, "action $action")
             if (action != null) {
                 when (action) {
                     BluetoothAdapter.ACTION_STATE_CHANGED -> {

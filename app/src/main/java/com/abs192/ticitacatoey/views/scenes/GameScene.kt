@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.abs192.ticitacatoey.R
+import com.abs192.ticitacatoey.audio.AudioManager
 import com.abs192.ticitacatoey.game.*
 import com.abs192.ticitacatoey.types.GameInfo
 import com.abs192.ticitacatoey.views.AnimatorUtil
@@ -12,6 +13,7 @@ import com.abs192.ticitacatoey.views.canvas.GridCanvas
 
 class GameScene(
     private val gameMode: GameManager.GameMode,
+    private val audioManager: AudioManager,
     context: Context,
     layoutInflater: LayoutInflater,
     mainLayout: ConstraintLayout
@@ -27,6 +29,7 @@ class GameScene(
         fadeIn()
 
         gridCanvas = gameLayout?.findViewById(R.id.gridCanvas)
+        gridCanvas?.setAudioManager(audioManager)
         val game = Game()
         val gameManager = GameManager(gameMode, game, gameInfo, gridCanvas!!)
         gameManager.initialize()

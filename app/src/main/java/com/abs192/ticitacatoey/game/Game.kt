@@ -6,8 +6,10 @@ import kotlin.random.Random
 class Game {
 
     private val board = arrayListOf("", "", "", "", "", "", "", "", "")
-    private val rnd = Random(1231L)
+    private val rnd1 = Random(1231L)
+    private val rnd2 = Random(1419L)
     private var toMove = randomMove()
+    var currentState: GameState = GameState.STARTING
 
     fun getToMove(): String {
         return toMove
@@ -109,16 +111,18 @@ class Game {
         for (index in board.indices) {
             board[index] = ""
         }
-        toMove = randomMove()
+        currentState = GameState.STARTING
     }
 
     fun randomMove(): String {
-        return if (rnd.nextInt(2) == 1)
-            "x"
-        else "o"
+        return if (rnd1.nextInt(2) == 1)
+            "o"
+        else "x"
     }
 
     fun resetToMove() {
-        toMove = randomMove()
+        toMove = if (rnd2.nextInt(2) == 1)
+            "o"
+        else "x"
     }
 }

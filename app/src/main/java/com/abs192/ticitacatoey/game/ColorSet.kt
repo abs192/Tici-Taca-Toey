@@ -1,7 +1,7 @@
 package com.abs192.ticitacatoey.game
 
 class ColorSet(
-    val dividerColor: Int,
+    val primaryColor: Int,
     val foregroundColor: Int,
     val backgroundColor: Int,
     val accentColor: Int,
