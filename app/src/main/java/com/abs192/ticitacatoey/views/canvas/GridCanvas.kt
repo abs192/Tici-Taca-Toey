@@ -365,7 +365,7 @@ class GridCanvas(context: Context, attributeSet: AttributeSet?) : View(context, 
 //        invalidate()
     }
 
-    fun setAudioManager(audioManager: AudioManager) {
+    fun setAudioManager(audioManager: AudioManager?) {
         this.audioManager = audioManager
     }
 }

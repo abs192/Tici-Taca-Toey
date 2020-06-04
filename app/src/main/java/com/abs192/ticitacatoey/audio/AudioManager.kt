@@ -1,34 +1,35 @@
 package com.abs192.ticitacatoey.audio
 
-import android.app.Activity
-import android.media.MediaPlayer
+import android.content.Context
+import android.media.AudioAttributes
+import android.media.SoundPool
+import com.abs192.ticitacatoey.R
 
-class AudioManager(var activity: Activity) {
 
-    private var assetFileNameClick = "click1.mp3"
-    private var assetFileNamePing = "ping1.mp3"
+class AudioManager(context: Context) {
+
+    private val attributes: AudioAttributes = AudioAttributes.Builder()
+        .setUsage(AudioAttributes.USAGE_GAME)
+        .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+        .build()
+    var soundPool: SoundPool? = SoundPool.Builder()
+        .setAudioAttributes(attributes)
+        .build()
+
+    private val click = soundPool?.load(context, R.raw.click1, 1)
+    private val ping = soundPool?.load(context, R.raw.ping1, 1)
 
     fun playClick() {
-        play(assetFileNameClick)
+        click?.let { soundPool?.play(it, 1F, 1F, 0, 0, 1F) }
     }
 
     fun playPing() {
-        play(assetFileNamePing)
+        ping?.let { soundPool?.play(it, 1F, 1F, 0, 0, 1F) }
     }
 
-    private fun play(s: String) {
-        try {
-            val mp = MediaPlayer()
-            val afd = activity.assets.openFd(s)
-            mp.setDataSource(afd.fileDescriptor, afd.startOffset, afd.length)
-            mp.prepare()
-            mp.start()
-            mp.setOnCompletionListener {
-                it.stop()
-                it.release()
-            }
-        } catch (e: Exception) {
-        }
+
+    fun destroy() {
+        soundPool?.release()
     }
 
 }

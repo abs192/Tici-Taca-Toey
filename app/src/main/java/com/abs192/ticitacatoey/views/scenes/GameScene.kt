@@ -13,7 +13,7 @@ import com.abs192.ticitacatoey.views.canvas.GridCanvas
 
 class GameScene(
     private val gameMode: GameManager.GameMode,
-    private val audioManager: AudioManager,
+    private val audioManager: AudioManager?,
     context: Context,
     layoutInflater: LayoutInflater,
     mainLayout: ConstraintLayout

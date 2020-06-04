@@ -18,7 +18,6 @@ class PlayComputerScene(
     private var newGameLayoutComputer: View? = null
     private var buttonPlayComputerEasy: Button? = null
     private var buttonPlayComputerHard: Button? = null
-    private var buttonPlayComputerImpossible: Button? = null
 
     override fun initScene() {
         newGameLayoutComputer = layoutInflater.inflate(R.layout.layout_play_computer, null)
@@ -26,8 +25,6 @@ class PlayComputerScene(
         fadeIn()
         buttonPlayComputerEasy = newGameLayoutComputer?.findViewById(R.id.newGameButtonComputerEasy)
         buttonPlayComputerHard = newGameLayoutComputer?.findViewById(R.id.newGameButtonComputerHard)
-        buttonPlayComputerImpossible =
-            newGameLayoutComputer?.findViewById(R.id.newGameButtonComputerImpossible)
 
         buttonPlayComputerEasy?.setOnClickListener {
             fadeOut()
@@ -36,10 +33,6 @@ class PlayComputerScene(
         buttonPlayComputerHard?.setOnClickListener {
             fadeOut()
             listener.onHardClicked()
-        }
-        buttonPlayComputerImpossible?.setOnClickListener {
-            fadeOut()
-            listener.onImpossibleClicked()
         }
 
     }
@@ -54,8 +47,7 @@ class PlayComputerScene(
             true,
             newGameLayoutComputer,
             buttonPlayComputerEasy,
-            buttonPlayComputerHard,
-            buttonPlayComputerImpossible
+            buttonPlayComputerHard
         )
         animatorUtil.fadeIn(newGameLayoutComputer!!, AnimatorUtil.Duration.LONG, null)
     }
@@ -66,8 +58,7 @@ class PlayComputerScene(
             true,
             newGameLayoutComputer,
             buttonPlayComputerEasy,
-            buttonPlayComputerHard,
-            buttonPlayComputerImpossible
+            buttonPlayComputerHard
         )
         animatorUtil.fadeIn(newGameLayoutComputer!!, AnimatorUtil.Duration.SHORT, null)
     }
@@ -77,8 +68,7 @@ class PlayComputerScene(
             false,
             newGameLayoutComputer,
             buttonPlayComputerEasy,
-            buttonPlayComputerHard,
-            buttonPlayComputerImpossible
+            buttonPlayComputerHard
         )
         animatorUtil.fadeOut(newGameLayoutComputer!!, AnimatorUtil.Duration.MEDIUM, null)
     }
@@ -86,7 +76,6 @@ class PlayComputerScene(
     interface PlayComputerButtonClickListener {
         fun onEasyClicked()
         fun onHardClicked()
-        fun onImpossibleClicked()
     }
 
 }

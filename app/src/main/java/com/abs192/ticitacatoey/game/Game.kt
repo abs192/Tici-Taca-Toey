@@ -12,6 +12,16 @@ class Game {
     val highlightedIndices = arrayListOf<Int>()
     var currentState: GameState = GameState.STARTING
 
+    constructor()
+
+    constructor(board: ArrayList<String>, toMove: String) {
+        board.forEachIndexed { i, it ->
+            this.board[i] = it
+        }
+        this.toMove = toMove
+        this.currentState = GameState.ONGOING
+    }
+
     fun getToMove(): String {
         return toMove
     }
@@ -134,6 +144,10 @@ class Game {
         return if (rnd1.nextInt(2) == 1)
             "o"
         else "x"
+    }
+
+    fun printBoard(): ArrayList<String> {
+        return this.board
     }
 
     fun resetToMove() {

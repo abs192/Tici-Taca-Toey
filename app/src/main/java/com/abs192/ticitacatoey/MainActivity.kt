@@ -35,7 +35,7 @@ class MainActivity : AppCompatActivity() {
 
     private val store = Store(this)
 
-    private val audioManager = AudioManager(this)
+    private var audioManager: AudioManager? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         if (store.getBackgroundTheme() == Store.Theme.LIGHT) {
@@ -61,6 +61,7 @@ class MainActivity : AppCompatActivity() {
             //loadScene
         }
         btService = BTService(this)
+        audioManager = AudioManager(this)
     }
 
     private fun newGameScene(): NewGameScene {
@@ -118,10 +119,6 @@ class MainActivity : AppCompatActivity() {
 
                 override fun onHardClicked() {
                     sceneStack.add(playGameComputer(ComputerPlayer.Difficulty.HARD))
-                }
-
-                override fun onImpossibleClicked() {
-                    sceneStack.add(playGameComputer(ComputerPlayer.Difficulty.IMPOSSIBLE))
                 }
             })
         playComputerScene.initScene()
@@ -229,6 +226,8 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+
+        audioManager?.destroy()
         // TODO: Unregister when bt mode is fixed
 //        unregisterReceiver(bluetoothScanReceiver)
     }
