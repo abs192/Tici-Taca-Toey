@@ -145,7 +145,6 @@ class GridSection(private val canvasHelper: CanvasHelper) {
             gridPaint.color = dividerColors[idx]
             canvas?.drawRoundRect(it, 5F, 5F, gridPaint)
         }
-        Log.d("a", "ongoing $ongoing drawEnd $drawEnd ")
         squareRects.forEachIndexed { index, rect ->
             when {
                 ongoing -> canvas?.drawRect(rect, squarePaintNormal)

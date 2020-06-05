@@ -29,7 +29,7 @@ class MainActivity : AppCompatActivity() {
 
     private var btService: BTService? = null
 
-    private var player = Player("", "")
+    private var player = Player("p1", "")
 
     private var discoveryCallback: BTService.DiscoveryCallback? = null
 
@@ -209,10 +209,11 @@ class MainActivity : AppCompatActivity() {
             GameScene(GameManager.GameMode.HUMAN, audioManager, this, layoutInflater, mainLayout!!)
         gameScene.initGameInfo(
             GameInfo(
-                "a",
+                "",
                 player,
-                Player("p2", "p2"),
-                DefaultColorSets(this).computerColorSet
+                Player("p2", "You are"),
+                DefaultColorSets(this).computerColorSet,
+                isHumanLocalGame = true
             )
         )
         gameScene.initScene()
@@ -226,7 +227,6 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-
         audioManager?.destroy()
         // TODO: Unregister when bt mode is fixed
 //        unregisterReceiver(bluetoothScanReceiver)

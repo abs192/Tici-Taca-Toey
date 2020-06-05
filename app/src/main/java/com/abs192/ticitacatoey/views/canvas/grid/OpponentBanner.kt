@@ -9,22 +9,22 @@ class OpponentBanner(private val canvasHelper: CanvasHelper) {
 
     private val bannerPadding = 20
 
-    private var opponentBannerRect = Rect()
-    private var opponentIsDrawableRect = Rect()
+    private var bannerRect = Rect()
+    private var isDrawableRect = Rect()
 
-    private val opponentBannerBackgroundPaint = Paint()
-    private val opponentBannerEdgePaint = Paint()
-    private val opponentBannerEdgePaintWin = Paint()
-    private val opponentBannerTextPaint = Paint()
+    private val bannerBackgroundPaint = Paint()
+    private val bannerEdgePaint = Paint()
+    private val bannerEdgePaintWin = Paint()
+    private val bannerTextPaint = Paint()
 
     fun initRects() {
-        opponentBannerRect = Rect(
+        bannerRect = Rect(
             bannerPadding,
             0 - bannerPadding,
             canvasHelper.displayWidth - bannerPadding,
             canvasHelper.bannerSize
         )
-        opponentIsDrawableRect = Rect(
+        isDrawableRect = Rect(
             canvasHelper.displayWidth / 2 - canvasHelper.squareSize / 2,
             canvasHelper.bannerSize - canvasHelper.squareSize,
             canvasHelper.displayWidth / 2 + canvasHelper.squareSize / 2,
@@ -33,37 +33,37 @@ class OpponentBanner(private val canvasHelper: CanvasHelper) {
     }
 
     fun initColors(colorSet: ColorSet) {
-        opponentBannerTextPaint.color = colorSet.defaultTextColor
-        opponentBannerTextPaint.textAlign = Paint.Align.CENTER
-        opponentBannerTextPaint.textSize = opponentBannerRect.width() / 20F
-        opponentBannerTextPaint.isFakeBoldText = true
+        bannerTextPaint.color = colorSet.defaultTextColor
+        bannerTextPaint.textAlign = Paint.Align.CENTER
+        bannerTextPaint.textSize = bannerRect.width() / 20F
+        bannerTextPaint.isFakeBoldText = true
 
-        opponentBannerBackgroundPaint.color =
+        bannerBackgroundPaint.color =
             canvasHelper.shadeColor(colorSet.opponentBaseColor, -20)
 
         val oppBannerBackgroundColor1 = canvasHelper.shadeColor(colorSet.foregroundColor, -20)
         val oppBannerBackgroundColor2 = canvasHelper.shadeColor(colorSet.opponentBaseColor, 20)
         val oppBannerRadialGradient = RadialGradient(
-            opponentBannerRect.right / 2F,
-            opponentBannerRect.top.toFloat(),
-            opponentBannerRect.left / 2F,
+            bannerRect.right / 2F,
+            bannerRect.top.toFloat(),
+            bannerRect.left / 2F,
             intArrayOf(oppBannerBackgroundColor1, oppBannerBackgroundColor2),
             null,
             Shader.TileMode.MIRROR
         )
-        opponentBannerBackgroundPaint.shader = oppBannerRadialGradient
-        opponentBannerBackgroundPaint.style = Paint.Style.FILL
-        opponentBannerBackgroundPaint.alpha = 50
+        bannerBackgroundPaint.shader = oppBannerRadialGradient
+        bannerBackgroundPaint.style = Paint.Style.FILL
+        bannerBackgroundPaint.alpha = 50
 
-        opponentBannerEdgePaint.color = canvasHelper.shadeColor(colorSet.opponentBaseColor, 20)
-        opponentBannerEdgePaint.style = Paint.Style.STROKE
-        opponentBannerEdgePaint.strokeWidth = 15F
-        opponentBannerEdgePaint.alpha = 150
+        bannerEdgePaint.color = canvasHelper.shadeColor(colorSet.opponentBaseColor, 20)
+        bannerEdgePaint.style = Paint.Style.STROKE
+        bannerEdgePaint.strokeWidth = 15F
+        bannerEdgePaint.alpha = 150
 
-        opponentBannerEdgePaintWin.color = canvasHelper.shadeColor(colorSet.primaryColor, 20)
-        opponentBannerEdgePaintWin.style = Paint.Style.FILL_AND_STROKE
-        opponentBannerEdgePaintWin.strokeWidth = 30F
-        opponentBannerEdgePaintWin.alpha = 150
+        bannerEdgePaintWin.color = canvasHelper.shadeColor(colorSet.primaryColor, 20)
+        bannerEdgePaintWin.style = Paint.Style.FILL_AND_STROKE
+        bannerEdgePaintWin.strokeWidth = 30F
+        bannerEdgePaintWin.alpha = 150
     }
 
     fun draw(
@@ -73,36 +73,41 @@ class OpponentBanner(private val canvasHelper: CanvasHelper) {
         playerId: String,
         xo: String,
         gameState: GameState,
-        statusMsg: String
+        statusMsg: String,
+        isHumanLocalGame: Boolean
     ) {
 
         canvas?.drawRoundRect(
-            RectF(opponentBannerRect), 15F, 15F, opponentBannerBackgroundPaint
+            RectF(bannerRect), 15F, 15F, bannerBackgroundPaint
         )
 
         if (isItOpponentsMove) {
             canvas?.drawRoundRect(
-                RectF(opponentBannerRect), 15F, 15F, opponentBannerEdgePaint
+                RectF(bannerRect), 15F, 15F, bannerEdgePaint
             )
         }
-        val rect = Rect(
-            opponentBannerRect.left + bannerPadding,
-            opponentBannerRect.top - bannerPadding,
-            opponentBannerRect.right - bannerPadding,
-            opponentBannerRect.bottom - bannerPadding
+        val textRect = Rect(
+            bannerRect.left + bannerPadding,
+            bannerRect.top - bannerPadding,
+            bannerRect.right - bannerPadding,
+            bannerRect.bottom - bannerPadding
         )
-        canvas?.drawText(
-            "$playerName [$playerId]", rect.centerX().toFloat(),
-            rect.centerY().toFloat(), opponentBannerTextPaint
+        val rectBounds = Rect(
+            isDrawableRect.left + (isDrawableRect.width() / 3),
+            isDrawableRect.top + (isDrawableRect.height() / 3),
+            isDrawableRect.right - (isDrawableRect.width() / 3),
+            isDrawableRect.bottom - (isDrawableRect.height() / 3)
         )
+        canvas?.save()
+        if (isHumanLocalGame) {
+            canvas?.translate(0F, canvasHelper.bannerSize / 5F)
+            canvas?.rotate(180F, textRect.exactCenterX(), textRect.exactCenterY())
+        }
+        val playerNameText =
+            if (isHumanLocalGame) "You are"
+            else "$playerName - $playerId"
         canvasHelper.mXDrawable.alpha = 255
         canvasHelper.mODrawable.alpha = 255
-        val rectBounds = Rect(
-            opponentIsDrawableRect.left + (opponentIsDrawableRect.width() / 3),
-            opponentIsDrawableRect.top + (opponentIsDrawableRect.height() / 3),
-            opponentIsDrawableRect.right - (opponentIsDrawableRect.width() / 3),
-            opponentIsDrawableRect.bottom - (opponentIsDrawableRect.height() / 3)
-        )
 
         if (xo == "o") {
             canvasHelper.mODrawable.bounds = rectBounds
@@ -116,9 +121,34 @@ class OpponentBanner(private val canvasHelper: CanvasHelper) {
             (xo == "o" && gameState == GameState.O_WIN)
         ) {
             //you win
-            canvas?.drawRoundRect(
-                RectF(opponentBannerRect), 15F, 15F, opponentBannerEdgePaintWin
-            )
         }
+
+        if ((xo == "x" && gameState == GameState.X_WIN) ||
+            (xo == "o" && gameState == GameState.O_WIN)
+        ) {
+            //you win
+            canvas?.drawRoundRect(
+                RectF(bannerRect), 15F, 15F, bannerEdgePaintWin
+            )
+            if (isHumanLocalGame) {
+                canvasHelper.drawText(canvas, canvasHelper.winMsg, textRect, bannerTextPaint)
+            } else {
+                canvasHelper.drawText(canvas, playerNameText, textRect, bannerTextPaint)
+            }
+        } else if (isHumanLocalGame) {
+            if ((xo == "x" && gameState == GameState.O_WIN) ||
+                (xo == "o" && gameState == GameState.X_WIN)
+            ) {
+                canvasHelper.drawText(canvas, canvasHelper.loseMsg, textRect, bannerTextPaint)
+            } else if (gameState == GameState.DRAW) {
+                canvasHelper.drawText(canvas, canvasHelper.drawMsg, textRect, bannerTextPaint)
+            } else {
+                canvasHelper.drawText(canvas, "You are", textRect, bannerTextPaint)
+            }
+        } else {
+            canvasHelper.drawText(canvas, playerNameText, textRect, bannerTextPaint)
+        }
+
+        canvas?.restore()
     }
 }

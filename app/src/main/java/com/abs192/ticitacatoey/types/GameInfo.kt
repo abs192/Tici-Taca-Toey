@@ -7,9 +7,9 @@ class GameInfo(
     var gameId: String,
     var player1: Player,
     var player2: Player,
-    var colorSet: ColorSet
+    var colorSet: ColorSet,
+    val isHumanLocalGame: Boolean = false
 ) {
-
     var countWinsPlayer1 = 0
     var countWinsPlayer2 = 0
     var countDraws = 0

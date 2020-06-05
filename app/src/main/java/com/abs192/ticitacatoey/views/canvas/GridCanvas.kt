@@ -19,16 +19,13 @@ class GridCanvas(context: Context, attributeSet: AttributeSet?) : View(context, 
 
     private val canvasHelper = CanvasHelper(context)
     private var audioManager: AudioManager? = null
-    private lateinit var game: Game
 
+    private lateinit var game: Game
     private lateinit var gameInfo: GameInfo
+
     private lateinit var moveInputListener: MoveInputListener
 
     private var selectedSquare = Point(-1, -1)
-
-    private var winSquares = arrayListOf<Point>()
-
-    private var bannerText = ""
 
     private val opponentStatusMsg: String = ""
     private val yourStatusMsg: String = ""
@@ -44,14 +41,6 @@ class GridCanvas(context: Context, attributeSet: AttributeSet?) : View(context, 
     private val yourBanner = YourBanner(canvasHelper)
     private val gridSection = GridSection(canvasHelper)
 
-    /**
-     *  PAINT objects
-     */
-    private val bannerTextNormalPaint = Paint()
-    private val bannerSubTextNormalPaint = Paint()
-    private val bannerBottomTextWinPaint = Paint()
-    private val bannerBottomTextLosePaint = Paint()
-    private val bannerBottomTextDrawPaint = Paint()
 
     /**
      * Rect objects
@@ -84,37 +73,9 @@ class GridCanvas(context: Context, attributeSet: AttributeSet?) : View(context, 
         gridSection.initRects()
         yourBanner.initRects()
         opponentBanner.initRects()
-
-        bannerTextNormalPaint.color = Color.GRAY
-        bannerTextNormalPaint.strokeMiter = 2F
-        bannerTextNormalPaint.style = Paint.Style.FILL
-        bannerTextNormalPaint.textAlign = Paint.Align.CENTER
-        bannerTextNormalPaint.textSize = topRect.width() / 10F
-
-        bannerSubTextNormalPaint.color = Color.CYAN
-        bannerSubTextNormalPaint.textAlign = Paint.Align.CENTER
-        bannerSubTextNormalPaint.textSize = topRect.width() / 20F
-
     }
 
     fun initColors(colorSet: ColorSet) {
-
-        bannerTextNormalPaint.color = colorSet.bannerTextColor
-        bannerSubTextNormalPaint.color = colorSet.bannerSubTextColor
-//            Color.parseColor(utils.shadeColor(colorSet.bannerTextColor, -10))
-
-        bannerBottomTextWinPaint.color = colorSet.gameWinSquareColor
-        bannerBottomTextWinPaint.textAlign = Paint.Align.CENTER
-        bannerBottomTextWinPaint.textSize = topRect.width() / 20F
-
-        bannerBottomTextLosePaint.color = colorSet.gameLoseSquareColor
-        bannerBottomTextLosePaint.textAlign = Paint.Align.CENTER
-        bannerBottomTextLosePaint.textSize = topRect.width() / 20F
-
-        bannerBottomTextDrawPaint.color = colorSet.gameDrawSquareColor
-        bannerBottomTextDrawPaint.textAlign = Paint.Align.CENTER
-        bannerBottomTextDrawPaint.textSize = topRect.width() / 20F
-
         gridSection.initColors(colorSet)
         yourBanner.initColors(colorSet)
         opponentBanner.initColors(colorSet)
@@ -141,7 +102,8 @@ class GridCanvas(context: Context, attributeSet: AttributeSet?) : View(context, 
             gameInfo.player2.playerId,
             gameInfo.player2.xo,
             game.currentState,
-            opponentStatusMsg
+            opponentStatusMsg,
+            gameInfo.isHumanLocalGame
         )
     }
 
@@ -252,14 +214,18 @@ class GridCanvas(context: Context, attributeSet: AttributeSet?) : View(context, 
         } else if (event?.action == MotionEvent.ACTION_UP) {
             if (selectedSquare.x != -1 && selectedSquare.y != -1) {
                 Log.d(javaClass.simpleName, "yo moveInput $selectedSquare")
-
+                Log.d(
+                    javaClass.simpleName,
+                    "isAgainstComputer $isAgainstComputer isHumanLocalGame ${gameInfo.isHumanLocalGame}"
+                )
+                audioManager?.playClick()
                 if (isAgainstComputer) {
                     moveInputListener.makeMove(
                         gameInfo.player1.playerId,
                         selectedSquare.x,
                         selectedSquare.y
                     )
-                } else {
+                } else if (gameInfo.isHumanLocalGame) {
                     val playerIdToMove = if (game.getToMove() == gameInfo.player1.xo)
                         gameInfo.player1.playerId
                     else
@@ -303,26 +269,6 @@ class GridCanvas(context: Context, attributeSet: AttributeSet?) : View(context, 
 
     override fun gameEnd(checkEnd: GameState) {
         Log.d(javaClass.simpleName, "END - $checkEnd")
-        bannerText = when (checkEnd) {
-            GameState.DRAW -> {
-                "That's a draw"
-            }
-            GameState.X_WIN -> {
-                game.checkWin()
-                "X WINS!"
-            }
-            GameState.O_WIN -> {
-                "O WINS!"
-            }
-            GameState.ONGOING -> {
-                "..."
-            }
-            GameState.STARTING -> {
-                "Starting"
-            }
-        }
-//        winAnimation()
-        bannerSubText = "Restarting game..."
     }
 
     override fun gameStarting(
@@ -334,7 +280,7 @@ class GridCanvas(context: Context, attributeSet: AttributeSet?) : View(context, 
         this.didYouLose = false
         this.game = game
         this.gameInfo = gameInfo
-        this.yourBanner.updateStatusMsgs()
+        this.canvasHelper.updateStatusMsgs()
 
         if (gameInfo.player2 is ComputerPlayer) {
             isAgainstComputer = true
@@ -350,9 +296,6 @@ class GridCanvas(context: Context, attributeSet: AttributeSet?) : View(context, 
 
     override fun moveDone(x: Int, y: Int, xo: String) {
         audioManager?.playPing()
-        if (gameInfo.player1.xo == game.getToMove()) {
-            audioManager?.playClick()
-        }
         updateStatusMsg()
         invalidate()
     }
