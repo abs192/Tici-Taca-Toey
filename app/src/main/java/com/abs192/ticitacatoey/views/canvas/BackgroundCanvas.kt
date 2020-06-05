@@ -20,7 +20,7 @@ import kotlin.math.roundToInt
 class BackgroundCanvas(context: Context, attributeSet: AttributeSet?) :
     View(context, attributeSet) {
 
-    private lateinit var theme: Store.Theme
+    private lateinit var darkMode: Store.DarkMode
     private val baseSpeed = 200
     private val xoCount = 35
     private val randomSeed = 1994L
@@ -285,16 +285,16 @@ class BackgroundCanvas(context: Context, attributeSet: AttributeSet?) :
         setDrawableTints("#287AA9", "#287AA9")
     }
 
-    fun setTheme(theme: Store.Theme) {
-        this.theme = theme
+    fun setDarkMode(darkMode: Store.DarkMode) {
+        this.darkMode = darkMode
         val backgroundColor: Int
         val drawableColor: Int
-        when (theme) {
-            Store.Theme.DARK -> {
+        when (this.darkMode) {
+            Store.DarkMode.ON -> {
                 backgroundColor = Color.BLACK
                 drawableColor = Color.WHITE
             }
-            Store.Theme.LIGHT -> {
+            Store.DarkMode.OFF -> {
                 backgroundColor = Color.WHITE
                 drawableColor = Color.BLACK
             }

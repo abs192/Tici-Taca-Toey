@@ -5,23 +5,39 @@ import android.content.Context
 class Store(private val activity: MainActivity) {
 
     private val settingsThemeKey = "key_theme"
-    private val DEFAULT_THEME = 1 // Light theme
+    private val settingsDarkModeKey = "dark_mode"
+    private val DEFAULT = 0
 
-    fun getBackgroundTheme(): Theme {
+    fun getTheme(): Theme {
         val sharedPref = activity.getPreferences(Context.MODE_PRIVATE)
-        val saved = sharedPref.getInt(settingsThemeKey, DEFAULT_THEME)
+        val saved = sharedPref.getInt(settingsThemeKey, DEFAULT)
         return Theme.values()[saved]
     }
 
-    fun saveBackgroundTheme(t: Theme): Boolean {
+    fun saveTheme(t: Theme): Boolean {
         val sharedPref = activity.getPreferences(Context.MODE_PRIVATE)
         return sharedPref.edit().putInt(settingsThemeKey, Theme.values().indexOf(t)).commit()
     }
 
-
-    enum class Theme {
-        DARK,
-        LIGHT
+    fun getDarkMOde(): DarkMode {
+        val sharedPref = activity.getPreferences(Context.MODE_PRIVATE)
+        val saved = sharedPref.getInt(settingsDarkModeKey, DEFAULT)
+        return DarkMode.values()[saved]
     }
 
+    fun saveDarkMode(t: DarkMode): Boolean {
+        val sharedPref = activity.getPreferences(Context.MODE_PRIVATE)
+        return sharedPref.edit().putInt(settingsDarkModeKey, DarkMode.values().indexOf(t)).commit()
+    }
+
+
+    enum class Theme {
+        PINK,
+        BLUE
+    }
+
+    enum class DarkMode {
+        OFF,
+        ON
+    }
 }

@@ -38,12 +38,7 @@ class MainActivity : AppCompatActivity() {
     private var audioManager: AudioManager? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        if (store.getBackgroundTheme() == Store.Theme.LIGHT) {
-            setTheme(R.style.LightAppTheme)
-        } else {
-
-            setTheme(R.style.DarkAppTheme)
-        }
+        setThemeAndDarkMode()
         super.onCreate(savedInstanceState)
         requestWindowFeature(Window.FEATURE_NO_TITLE)
         supportActionBar?.hide()
@@ -52,7 +47,7 @@ class MainActivity : AppCompatActivity() {
         mainLayout = findViewById(R.id.main_layout)
         backgroundCanvas = findViewById(R.id.backgroundCanvas)
 
-        backgroundCanvas?.setTheme(store.getBackgroundTheme())
+        backgroundCanvas?.setDarkMode(store.getDarkMOde())
 
         // check scenes
         if (sceneStack.isEmpty()) {
@@ -62,6 +57,21 @@ class MainActivity : AppCompatActivity() {
         }
         btService = BTService(this)
         audioManager = AudioManager(this)
+    }
+
+    private fun setThemeAndDarkMode() {
+        when (store.getTheme()) {
+            Store.Theme.PINK -> if (store.getDarkMOde() == Store.DarkMode.OFF) {
+                setTheme(R.style.LightAppTheme)
+            } else {
+                setTheme(R.style.DarkAppTheme)
+            }
+            Store.Theme.BLUE -> if (store.getDarkMOde() == Store.DarkMode.OFF) {
+                setTheme(R.style.LightAppTheme_Blue)
+            } else {
+                setTheme(R.style.DarkAppTheme_Blue)
+            }
+        }
     }
 
     private fun newGameScene(): NewGameScene {
@@ -93,14 +103,22 @@ class MainActivity : AppCompatActivity() {
             layoutInflater,
             mainLayout!!,
             object : SettingsScene.SettingsClickListener {
-                override fun onThemeLightClicked() {
+                override fun onDarkModeOffClicked() {
                     recreate()
-                    backgroundCanvas?.setTheme(Store.Theme.LIGHT)
+                    backgroundCanvas?.setDarkMode(Store.DarkMode.OFF)
                 }
 
-                override fun onThemeDarkClicked() {
+                override fun onDarkModeOnClicked() {
                     recreate()
-                    backgroundCanvas?.setTheme(Store.Theme.DARK)
+                    backgroundCanvas?.setDarkMode(Store.DarkMode.ON)
+                }
+
+                override fun OnThemePinkClicked() {
+                    recreate()
+                }
+
+                override fun OnThemeBlueClicked() {
+                    recreate()
                 }
             })
         settingsScene.initScene()
@@ -161,11 +179,21 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 override fun onOnlineClicked() {
-
+                    sceneStack.add(playOnlineScene())
                 }
             })
         playHumanScene.initScene()
         return playHumanScene
+    }
+
+    private fun playOnlineScene(): PlayOnlineScene {
+        val playOnlineScene = PlayOnlineScene(
+            this,
+            layoutInflater,
+            mainLayout!!
+        )
+        playOnlineScene.initScene()
+        return playOnlineScene
     }
 
 

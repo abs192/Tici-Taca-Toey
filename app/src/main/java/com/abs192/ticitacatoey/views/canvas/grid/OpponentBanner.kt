@@ -121,15 +121,6 @@ class OpponentBanner(private val canvasHelper: CanvasHelper) {
             (xo == "o" && gameState == GameState.O_WIN)
         ) {
             //you win
-        }
-
-        if ((xo == "x" && gameState == GameState.X_WIN) ||
-            (xo == "o" && gameState == GameState.O_WIN)
-        ) {
-            //you win
-            canvas?.drawRoundRect(
-                RectF(bannerRect), 15F, 15F, bannerEdgePaintWin
-            )
             if (isHumanLocalGame) {
                 canvasHelper.drawText(canvas, canvasHelper.winMsg, textRect, bannerTextPaint)
             } else {
@@ -148,7 +139,15 @@ class OpponentBanner(private val canvasHelper: CanvasHelper) {
         } else {
             canvasHelper.drawText(canvas, playerNameText, textRect, bannerTextPaint)
         }
-
         canvas?.restore()
+
+
+        if ((xo == "x" && gameState == GameState.X_WIN) ||
+            (xo == "o" && gameState == GameState.O_WIN)
+        ) {
+            canvas?.drawRoundRect(
+                RectF(bannerRect), 15F, 15F, bannerEdgePaintWin
+            )
+        }
     }
 }

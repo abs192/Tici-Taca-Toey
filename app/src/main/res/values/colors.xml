@@ -2,18 +2,31 @@
 <resources>
 
     <!-- dark theme -->
-    <color name="colorPrimary">#e0b1c7</color>
-    <color name="colorPrimaryDark">#ca7aa0</color>
-    <color name="colorAccent">#7acaa4</color>
+    <color name="colorPrimary">#E0B1C7</color>
+    <color name="colorPrimaryDark">#CA7AA0</color>
+    <color name="colorAccent">#245B41</color>
     <color name="colorBackground">#111111</color>
     <color name="colorText">#EEEEEE</color>
 
     <!--    light theme -->
-    <color name="lightColorPrimary">#ae4677</color>
-    <color name="lightColorPrimaryDark">#682a47</color>
-    <color name="lightColorAccent">#7acaa4</color>
+    <color name="lightColorPrimary">#E0B1C7</color>
+    <color name="lightColorPrimaryDark">#CA7AA0</color>
+    <color name="lightColorAccent">#7ACAA4</color>
     <color name="lightColorBackground">#EEEEEE</color>
     <color name="lightColorText">#111111</color>
 
+    <!--    dark blue theme -->
+    <color name="blueColorPrimary">#14C9FF</color>
+    <color name="blueColorPrimaryDark">#005A76</color>
+    <color name="blueColorAccent">#892000</color>
+    <color name="blueColorBackground">#111111</color>
+    <color name="blueColorText">#EEEEEE</color>
+
+    <!--    light blue theme -->
+    <color name="blueLightColorPrimary">#14C9FF</color>
+    <color name="blueLightColorPrimaryDark">#005A76</color>
+    <color name="blueLightColorAccent">#FF3C00</color>
+    <color name="blueLightColorBackground">#EEEEEE</color>
+    <color name="blueLightColorText">#111111</color>
 
 </resources>

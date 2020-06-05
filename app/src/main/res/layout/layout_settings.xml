@@ -36,18 +36,61 @@
             android:textColor="?colorText"
             android:textSize="20sp" />
 
-        <Switch
-            android:id="@+id/settingsSwitchTheme"
+        <RadioGroup
+            android:id="@+id/settingsRBTheme"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
-            android:showText="true"
-            android:textAllCaps="false"
+            android:orientation="horizontal"
+            android:padding="5sp">
+
+            <RadioButton
+                android:id="@+id/radioButtonPink"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:buttonTint="@color/colorPrimary"
+                android:text="Pink"
+                android:textColor="?colorText"
+                android:textSize="18sp" />
+
+            <RadioButton
+                android:id="@+id/radioButtonBlue"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:buttonTint="@color/blueColorPrimary"
+                android:text="Blue"
+                android:textColor="?colorText"
+                android:textSize="18sp" />
+        </RadioGroup>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginEnd="15dp"
+            android:text="Dark mode"
+            android:textColor="?colorText"
+            android:textSize="20sp" />
+
+        <Switch
+            android:id="@+id/settingsSwitchDarkMode"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
             android:padding="5sp"
-            android:textOff="Light"
-            android:textOn="Dark"
-            android:textSize="20sp"
+            android:showText="true"
             android:switchTextAppearance="@style/SwitchTextAppearance"
+            android:textAllCaps="false"
+            android:textOff="Off"
+            android:textOn="On"
+            android:textSize="18sp"
             android:thumb="@drawable/selector_thumb_theme_settings"
             android:track="@drawable/selector_track_theme_settings" />
     </LinearLayout>

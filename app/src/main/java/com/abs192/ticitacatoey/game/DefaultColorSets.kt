@@ -20,7 +20,7 @@ class DefaultColorSets(context: Context) {
         accentColor = typedValue.data
         context.theme.resolveAttribute(R.attr.colorText, typedValue, true)
         foregroundColor = typedValue.data
-        context.theme.resolveAttribute(R.attr.colorPrimary, typedValue, true)
+        context.theme.resolveAttribute(R.attr.colorPrimaryDark, typedValue, true)
         primaryColor = typedValue.data
     }
 

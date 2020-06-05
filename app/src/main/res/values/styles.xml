@@ -23,6 +23,26 @@
 
     <style name="DarkAppTheme" parent="AppTheme" />
 
+    <style name="LightAppTheme.Blue" parent="AppTheme">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/blueLightColorPrimary</item>
+        <item name="colorPrimaryDark">@color/blueLightColorPrimaryDark</item>
+        <item name="colorAccent">@color/blueLightColorAccent</item>
+        <item name="colorBackground">@color/blueLightColorBackground</item>
+        <item name="colorText">@color/blueLightColorText</item>
+        <item name="android:windowTranslucentStatus">true</item>
+    </style>
+
+    <style name="DarkAppTheme.Blue" parent="LightAppTheme.Blue">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/blueColorPrimary</item>
+        <item name="colorPrimaryDark">@color/blueColorPrimaryDark</item>
+        <item name="colorAccent">@color/blueColorAccent</item>
+        <item name="colorBackground">@color/blueColorBackground</item>
+        <item name="colorText">@color/blueColorText</item>
+        <item name="android:windowTranslucentStatus">true</item>
+    </style>
+
     <style name="AppTheme.NoActionBar">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
