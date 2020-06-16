@@ -1,32 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/playOnline"
+    android:id="@+id/dialogJoinGameOnline"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_centerInParent="true"
-    android:alpha="0"
     android:orientation="vertical">
 
-
-    <Button
-        android:id="@+id/onlineButtonHost"
+    <ProgressBar
+        android:id="@+id/progressBarDialogJoinGameOnline"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="8dp"
-        android:background="@drawable/button_background"
-        android:text="Host game"
-        android:textColor="?colorText" />
+        android:visibility="invisible"
+        android:layout_gravity="center" />
 
     <Button
-        android:id="@+id/onlineButtonJoin"
+        android:id="@+id/joinGameDialogScanQRCode"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="center"
         android:layout_margin="8dp"
         android:background="@drawable/button_background"
-        android:text="Join game"
+        android:text="Scan QR Code"
         android:textColor="?colorText" />
 </LinearLayout>
-
-
-

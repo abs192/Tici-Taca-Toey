@@ -235,6 +235,15 @@ class GridCanvas(context: Context, attributeSet: AttributeSet?) : View(context, 
                         selectedSquare.x,
                         selectedSquare.y
                     )
+                } else {
+                    if (game.getToMove() == gameInfo.player1.xo) {
+                        moveInputListener.makeMove(
+                            gameInfo.player1.playerId,
+                            selectedSquare.x,
+                            selectedSquare.y
+                        )
+                    }
+
                 }
                 selectedSquare = Point(-1, -1)
             }

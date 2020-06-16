@@ -2,6 +2,7 @@ package com.abs192.ticitacatoey.game
 
 import android.os.Handler
 import android.util.Log
+import com.abs192.ticitacatoey.game.online.WebsocketManager
 import com.abs192.ticitacatoey.types.GameInfo
 import com.abs192.ticitacatoey.views.canvas.GridCanvas
 
@@ -9,18 +10,17 @@ class GameManager(
     private val gameMode: GameMode,
     var game: Game,
     var gameInfo: GameInfo,
-    private val gameGrid: GridCanvas
+    private val gameGrid: GridCanvas,
+    private val turnPlayer: Boolean
 ) :
     MoveInputListener {
 
     private var player1PostMoveInputListener: PostMoveEventListener? = null
     private var player2PostMoveInputListener: PostMoveEventListener? = null
 
-
     fun initialize() {
         // depending on the game type
         gameGrid.initColors(gameInfo.colorSet)
-
 
         when (gameMode) {
             GameMode.COMPUTER -> {
@@ -36,9 +36,49 @@ class GameManager(
                 player1PostMoveInputListener = gameGrid
                 player2PostMoveInputListener = gameGrid
             }
+            GameMode.ONLINE -> {
+
+                gameGrid.registerMoveListener(this)
+                player1PostMoveInputListener = gameGrid
+
+                val onlinePlayer = gameInfo.player2 as OnlinePlayer
+                player2PostMoveInputListener = onlinePlayer
+                onlinePlayer.registerMoveListener(this)
+
+                onlinePlayer.websocketManager.setOnMoveFromOnlineListener(object :
+                    WebsocketManager.MoveFromOnlineListener {
+                    override fun moveMade(makeMoveRequestMessage: WebsocketManager.MakeMoveResponseMessage) {
+                        val aL = arrayListOf<String>()
+                        aL.addAll(makeMoveRequestMessage.positions[0])
+                        aL.addAll(makeMoveRequestMessage.positions[1])
+                        aL.addAll(makeMoveRequestMessage.positions[2])
+
+                        val toList = aL.map {
+                            if (it == gameInfo.player1.playerId) {
+                                gameInfo.player1.xo
+                            } else if (it == gameInfo.player2.playerId) {
+                                gameInfo.player2.xo
+                            } else {
+                                ""
+                            }
+                        }.toList()
+
+                        val newList = ArrayList<String>(toList)
+                        val turn: String
+                        if (gameInfo.player1.playerId == makeMoveRequestMessage.turn) {
+                            turn = gameInfo.player1.xo
+                        } else {
+                            turn = gameInfo.player2.xo
+                        }
+                        game.updateBoard(newList, turn)
+                        player1PostMoveInputListener?.moveDone(0, 0, "")
+                    }
+                })
+            }
         }
         startNewGame()
     }
+
 
     private fun resetPlayerXOs() {
         val xo = game.randomMove()
@@ -82,6 +122,13 @@ class GameManager(
             return
         }
 
+        if (gameMode == GameMode.ONLINE) {
+            if (isItPlayersTurn(gameInfo.player1.playerId)) {
+                val player = (gameInfo.player2) as OnlinePlayer
+                player.makeMove(x, y)
+            }
+
+        }
         val xoToMove = game.getToMove()
         val moveDone: Boolean = if (xoToMove == "o") {
             game.makeMoveO(x, y)
@@ -131,6 +178,17 @@ class GameManager(
 
     private fun startNewGame() {
         resetPlayerXOs()
+
+        if (turnPlayer) {
+            if (gameInfo.player1.xo != game.getToMove()) {
+                game.makeItHisMove(gameInfo.player1.xo)
+            }
+        } else {
+            if (gameInfo.player2.xo != game.getToMove()) {
+                game.makeItHisMove(gameInfo.player2.xo)
+            }
+        }
+
         player1PostMoveInputListener?.gameStarting(game, gameInfo)
         player2PostMoveInputListener?.gameStarting(game, gameInfo)
     }
@@ -144,6 +202,7 @@ class GameManager(
 
     enum class GameMode {
         COMPUTER,
-        HUMAN
+        HUMAN,
+        ONLINE
     }
 }

@@ -18,12 +18,12 @@ abstract class TTTScene(
 
     abstract fun initScene()
 
-    public open fun backPressed() {}
+    open fun backPressed() {}
 
-    public open fun fadeIn() {}
-    public open fun fadeOut() {}
+    open fun fadeIn() {}
+    open fun fadeOut() {}
 
-    public open fun fadeInFast() {}
+    open fun fadeInFast() {}
 
 
     protected fun enableDisableViews(

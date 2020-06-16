@@ -37,15 +37,6 @@
             android:textColor="?colorText" />
 
         <Button
-            android:id="@+id/newGameButtonHumanBluetooth"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="8dp"
-            android:background="@drawable/button_background"
-            android:text="Bluetooth"
-            android:textColor="?colorText" />
-
-        <Button
             android:id="@+id/newGameButtonHumanOnline"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

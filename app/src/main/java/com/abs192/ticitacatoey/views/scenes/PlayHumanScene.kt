@@ -17,28 +17,19 @@ class PlayHumanScene(
 
     private var newGameLayoutHuman: View? = null
     private var buttonPlayHumanLocal: Button? = null
-    private var buttonPlayHumanBluetooth: Button? = null
-    private var buttonPlayHumanOnline: Button? = null
+     private var buttonPlayHumanOnline: Button? = null
 
     override fun initScene() {
         newGameLayoutHuman = layoutInflater.inflate(R.layout.layout_play_human, null)
         addChildInMainLayout(newGameLayoutHuman!!)
         fadeIn()
         buttonPlayHumanLocal = newGameLayoutHuman?.findViewById(R.id.newGameButtonHumanLocal)
-        buttonPlayHumanBluetooth =
-            newGameLayoutHuman?.findViewById(R.id.newGameButtonHumanBluetooth)
-        buttonPlayHumanOnline = newGameLayoutHuman?.findViewById(R.id.newGameButtonHumanOnline)
+         buttonPlayHumanOnline = newGameLayoutHuman?.findViewById(R.id.newGameButtonHumanOnline)
 
-        //TODO: Remove when bt mode is fixed
-        buttonPlayHumanBluetooth?.visibility = View.GONE
 
         buttonPlayHumanLocal?.setOnClickListener {
             fadeOut()
             listener.onLocalClicked()
-        }
-        buttonPlayHumanBluetooth?.setOnClickListener {
-            fadeOut()
-            listener.onBluetoothClicked()
         }
         buttonPlayHumanOnline?.setOnClickListener {
             fadeOut()
@@ -57,8 +48,7 @@ class PlayHumanScene(
             true,
             newGameLayoutHuman,
             buttonPlayHumanLocal,
-            buttonPlayHumanBluetooth,
-            buttonPlayHumanOnline
+             buttonPlayHumanOnline
         )
         animatorUtil.fadeIn(newGameLayoutHuman!!, AnimatorUtil.Duration.LONG, null)
     }
@@ -69,8 +59,7 @@ class PlayHumanScene(
             true,
             newGameLayoutHuman,
             buttonPlayHumanLocal,
-            buttonPlayHumanBluetooth,
-            buttonPlayHumanOnline
+             buttonPlayHumanOnline
         )
         animatorUtil.fadeIn(newGameLayoutHuman!!, AnimatorUtil.Duration.SHORT, null)
     }
@@ -80,16 +69,14 @@ class PlayHumanScene(
             false,
             newGameLayoutHuman,
             buttonPlayHumanLocal,
-            buttonPlayHumanBluetooth,
-            buttonPlayHumanOnline
+             buttonPlayHumanOnline
         )
         animatorUtil.fadeOut(newGameLayoutHuman!!, AnimatorUtil.Duration.MEDIUM, null)
     }
 
     interface PlayHumanButtonClickListener {
         fun onLocalClicked()
-        fun onBluetoothClicked()
-        fun onOnlineClicked()
+         fun onOnlineClicked()
     }
 
 }

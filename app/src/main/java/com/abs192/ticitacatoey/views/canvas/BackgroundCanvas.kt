@@ -281,10 +281,6 @@ class BackgroundCanvas(context: Context, attributeSet: AttributeSet?) :
         setDrawableTints("#EE1111", "#EE1111")
     }
 
-    fun showBluetoothTint() {
-        setDrawableTints("#287AA9", "#287AA9")
-    }
-
     fun setDarkMode(darkMode: Store.DarkMode) {
         this.darkMode = darkMode
         val backgroundColor: Int

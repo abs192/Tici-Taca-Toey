@@ -7,6 +7,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import com.abs192.ticitacatoey.R
 import com.abs192.ticitacatoey.audio.AudioManager
 import com.abs192.ticitacatoey.game.*
+import com.abs192.ticitacatoey.game.online.WebsocketManager
 import com.abs192.ticitacatoey.types.GameInfo
 import com.abs192.ticitacatoey.views.AnimatorUtil
 import com.abs192.ticitacatoey.views.canvas.GridCanvas
@@ -21,6 +22,9 @@ class GameScene(
 
     private var gameLayout: View? = null
     private var gridCanvas: GridCanvas? = null
+
+    private var turnPlayer = false
+
     private lateinit var gameInfo: GameInfo
 
     override fun initScene() {
@@ -30,8 +34,9 @@ class GameScene(
 
         gridCanvas = gameLayout?.findViewById(R.id.gridCanvas)
         gridCanvas?.setAudioManager(audioManager)
+
         val game = Game()
-        val gameManager = GameManager(gameMode, game, gameInfo, gridCanvas!!)
+        val gameManager = GameManager(gameMode, game, gameInfo, gridCanvas!!, turnPlayer)
         gameManager.initialize()
     }
 
@@ -67,6 +72,31 @@ class GameScene(
 
     fun initGameInfo(gameInfo: GameInfo) {
         this.gameInfo = gameInfo
+    }
+
+    fun onlineGameInit(
+        playerId: String,
+        websocketManager: WebsocketManager,
+        gsrm: WebsocketManager.GameStartedResponseMessage
+    ) {
+
+        var p2Id = ""
+        for (p in gsrm.players) {
+            if (p != playerId) {
+                p2Id = p
+                break
+            }
+        }
+
+        this.gameInfo =
+            GameInfo(
+                "",
+                Player(playerId, ""),
+                OnlinePlayer(p2Id, websocketManager),
+                DefaultColorSets(context).computerColorSet,
+                isHumanLocalGame = false
+            )
+        this.turnPlayer = (playerId == gsrm.turn)
     }
 
 }

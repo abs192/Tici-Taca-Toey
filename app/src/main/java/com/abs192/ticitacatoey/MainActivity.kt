@@ -1,24 +1,26 @@
 package com.abs192.ticitacatoey
 
-import android.bluetooth.BluetoothAdapter
-import android.bluetooth.BluetoothDevice
-import android.content.BroadcastReceiver
+import android.app.Activity
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.Window
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.abs192.ticitacatoey.audio.AudioManager
-import com.abs192.ticitacatoey.bluetooth.BTService
 import com.abs192.ticitacatoey.game.ComputerPlayer
 import com.abs192.ticitacatoey.game.DefaultColorSets
 import com.abs192.ticitacatoey.game.GameManager
 import com.abs192.ticitacatoey.game.Player
+import com.abs192.ticitacatoey.game.online.QRCodeScanner
+import com.abs192.ticitacatoey.game.online.WebsocketManager
 import com.abs192.ticitacatoey.types.GameInfo
 import com.abs192.ticitacatoey.views.canvas.BackgroundCanvas
 import com.abs192.ticitacatoey.views.scenes.*
+import com.google.zxing.integration.android.IntentIntegrator
 import java.util.*
+
 
 class MainActivity : AppCompatActivity() {
 
@@ -27,15 +29,13 @@ class MainActivity : AppCompatActivity() {
 
     private var sceneStack: Stack<TTTScene> = Stack()
 
-    private var btService: BTService? = null
-
     private var player = Player("p1", "")
-
-    private var discoveryCallback: BTService.DiscoveryCallback? = null
 
     private val store = Store(this)
 
     private var audioManager: AudioManager? = null
+
+    private var qrCodeScanner: QRCodeScanner? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         setThemeAndDarkMode()
@@ -49,14 +49,22 @@ class MainActivity : AppCompatActivity() {
 
         backgroundCanvas?.setDarkMode(store.getDarkMOde())
 
-        // check scenes
-        if (sceneStack.isEmpty()) {
-            sceneStack.add(newGameScene())
-        } else {
-            //loadScene
-        }
-        btService = BTService(this)
         audioManager = AudioManager(this)
+        qrCodeScanner = QRCodeScanner(this)
+
+        sceneStack.add(newGameScene())
+
+        val intent = intent
+        if (Intent.ACTION_VIEW == intent.action) {
+            val uri: Uri? = intent.data
+            if (uri.toString().contains("joinGame", false)) {
+                val gameId: String? = uri?.getQueryParameter("gameId")
+                sceneStack.peek().fadeOut()
+                gameId?.let {
+                    sceneStack.add(playOnlineScene(it))
+                }
+            }
+        }
     }
 
     private fun setThemeAndDarkMode() {
@@ -174,10 +182,6 @@ class MainActivity : AppCompatActivity() {
                     sceneStack.add(playGameHuman())
                 }
 
-                override fun onBluetoothClicked() {
-                    sceneStack.add(bluetoothConnectScene())
-                }
-
                 override fun onOnlineClicked() {
                     sceneStack.add(playOnlineScene())
                 }
@@ -186,39 +190,45 @@ class MainActivity : AppCompatActivity() {
         return playHumanScene
     }
 
-    private fun playOnlineScene(): PlayOnlineScene {
+    private fun playOnlineScene(gameId: String = ""): PlayOnlineScene {
         val playOnlineScene = PlayOnlineScene(
             this,
+            qrCodeScanner!!,
             layoutInflater,
-            mainLayout!!
+            mainLayout!!,
+            object : PlayOnlineScene.OnPlayOnlineButtonClickListener {
+                override fun onHostGameClicked() {
+                }
+
+                override fun onJoinGameClicked() {
+                }
+            }
         )
         playOnlineScene.initScene()
+        if (gameId.isNotEmpty()) {
+            playOnlineScene.joinGame(gameId)
+        }
         return playOnlineScene
     }
 
-
-    private fun bluetoothConnectScene(): BluetoothConnectScene {
-        val bluetoothConnectScene = BluetoothConnectScene(
-            this,
-            btService!!,
-            layoutInflater,
-            mainLayout!!,
-            object : BluetoothConnectScene.BluetoothConnectClickListener {
-                override fun onHostGame() {
-                }
-
-                override fun onSearchGame() {
-                }
-            })
-        bluetoothConnectScene.initScene()
-        return bluetoothConnectScene
-    }
-
-
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        Log.d(javaClass.simpleName, "onActivityResult  $requestCode resultCode $resultCode")
+        if (requestCode == IntentIntegrator.REQUEST_CODE) {
+            if (resultCode == Activity.RESULT_OK) {
+                val result =
+                    IntentIntegrator.parseActivityResult(requestCode, resultCode, data)
+                if (result != null) {
+                    Log.d(javaClass.simpleName, "qrcode contents ${result.contents}")
+                    qrCodeScanner?.onScanned(result.contents)
+                }
+            } else if (resultCode == Activity.RESULT_CANCELED) {
+                Log.d(javaClass.simpleName, "qrcode cancelled")
+                qrCodeScanner?.onScanned("")
+            }
+        } else {
+            Log.d(javaClass.simpleName, "activity result $requestCode $resultCode")
+        }
         super.onActivityResult(requestCode, resultCode, data)
-        Log.d(javaClass.simpleName, "activity result $requestCode $resultCode")
-        btService!!.onActivityResult(requestCode, resultCode, data)
     }
 
     override fun onRequestPermissionsResult(
@@ -226,15 +236,20 @@ class MainActivity : AppCompatActivity() {
         permissions: Array<out String>,
         grantResults: IntArray
     ) {
+        // add internet permission callbacks
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        btService!!.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
 
 
     private fun playGameHuman(): GameScene {
-        backgroundCanvas?.computerGameStart()
         val gameScene =
-            GameScene(GameManager.GameMode.HUMAN, audioManager, this, layoutInflater, mainLayout!!)
+            GameScene(
+                GameManager.GameMode.HUMAN,
+                audioManager,
+                this,
+                layoutInflater,
+                mainLayout!!
+            )
         gameScene.initGameInfo(
             GameInfo(
                 "",
@@ -248,6 +263,27 @@ class MainActivity : AppCompatActivity() {
         return gameScene
     }
 
+    fun playGameOnlineScene(
+        playerId: String,
+        websocketManager: WebsocketManager,
+        gameStartedResponseMessage: WebsocketManager.GameStartedResponseMessage
+    ) {
+        if (sceneStack.peek() is GameScene) {
+            sceneStack.pop().backPressed()
+        }
+        val gameScene =
+            GameScene(
+                GameManager.GameMode.ONLINE,
+                audioManager,
+                this,
+                layoutInflater,
+                mainLayout!!
+            )
+        gameScene.onlineGameInit(playerId, websocketManager, gameStartedResponseMessage)
+        gameScene.initScene()
+        sceneStack.add(gameScene)
+    }
+
     override fun onPause() {
         super.onPause()
         backgroundCanvas?.pause()
@@ -256,8 +292,6 @@ class MainActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         audioManager?.destroy()
-        // TODO: Unregister when bt mode is fixed
-//        unregisterReceiver(bluetoothScanReceiver)
     }
 
     override fun onResume() {
@@ -286,47 +320,6 @@ class MainActivity : AppCompatActivity() {
         if (sceneStack.peek().sceneType != SceneType.GAME) {
             // TODO: handle better based on game type
             backgroundCanvas?.normalTint()
-        }
-    }
-
-    fun setDiscoveryCallback(discoveryCallback: BTService.DiscoveryCallback) {
-        this.discoveryCallback = discoveryCallback
-    }
-
-    val bluetoothScanReceiver: BroadcastReceiver? = object : BroadcastReceiver() {
-        override fun onReceive(context: android.content.Context?, intent: Intent?) {
-            val action = intent!!.action
-            Log.d(javaClass.simpleName, "scan receiver onReceive")
-            Log.d(javaClass.simpleName, "action $action")
-            if (action != null) {
-                when (action) {
-                    BluetoothAdapter.ACTION_STATE_CHANGED -> {
-                        val state =
-                            intent.getIntExtra(
-                                BluetoothAdapter.EXTRA_STATE,
-                                BluetoothAdapter.ERROR
-                            )
-                        if (state == BluetoothAdapter.STATE_OFF) {
-                            if (discoveryCallback != null) {
-//                                discoveryCallback?.onError(DiscoveryError.BLUETOOTH_DISABLED)
-                                discoveryCallback?.onError()
-                            }
-                        }
-                    }
-                    BluetoothAdapter.ACTION_DISCOVERY_STARTED ->
-                        discoveryCallback?.onDiscoveryStarted()
-                    BluetoothAdapter.ACTION_DISCOVERY_FINISHED -> {
-                        context!!.unregisterReceiver(this)
-                        discoveryCallback?.onDiscoveryFinished()
-                    }
-                    BluetoothDevice.ACTION_FOUND -> {
-                        val device =
-                            intent.getParcelableExtra<BluetoothDevice>(BluetoothDevice.EXTRA_DEVICE)
-                        device?.let { discoveryCallback?.onDeviceFound(device) }
-                    }
-                }
-            }
-
         }
     }
 }

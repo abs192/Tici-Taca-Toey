@@ -5,7 +5,7 @@ import kotlin.random.Random
 
 class Game {
 
-    private val board = arrayListOf("", "", "", "", "", "", "", "", "")
+    private var board = arrayListOf("", "", "", "", "", "", "", "", "")
     private val rnd1 = Random(1231L)
     private val rnd2 = Random(1419L)
     private var toMove = randomMove()
@@ -154,5 +154,14 @@ class Game {
         toMove = if (rnd2.nextInt(2) == 1)
             "o"
         else "x"
+    }
+
+    fun makeItHisMove(toMove: String) {
+        this.toMove = toMove
+    }
+
+    fun updateBoard(aL: java.util.ArrayList<String>, turn: String) {
+        board = aL
+        toMove = turn
     }
 }

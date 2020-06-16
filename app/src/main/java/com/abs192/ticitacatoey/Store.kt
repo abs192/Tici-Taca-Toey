@@ -5,12 +5,23 @@ import android.content.Context
 class Store(private val activity: MainActivity) {
 
     private val settingsThemeKey = "key_theme"
+    private val settingsProfileName = "key_profile_name"
     private val settingsDarkModeKey = "dark_mode"
-    private val DEFAULT = 0
+    private val keyDEFAULT = 0
+
+    fun getProfileName(): String {
+        val sharedPref = activity.getPreferences(Context.MODE_PRIVATE)
+        return sharedPref.getString(settingsProfileName, "")!!
+    }
+
+    fun setProfileName(s: String): Boolean {
+        val sharedPref = activity.getPreferences(Context.MODE_PRIVATE)
+        return sharedPref.edit().putString(settingsProfileName, s).commit()
+    }
 
     fun getTheme(): Theme {
         val sharedPref = activity.getPreferences(Context.MODE_PRIVATE)
-        val saved = sharedPref.getInt(settingsThemeKey, DEFAULT)
+        val saved = sharedPref.getInt(settingsThemeKey, keyDEFAULT)
         return Theme.values()[saved]
     }
 
@@ -21,7 +32,7 @@ class Store(private val activity: MainActivity) {
 
     fun getDarkMOde(): DarkMode {
         val sharedPref = activity.getPreferences(Context.MODE_PRIVATE)
-        val saved = sharedPref.getInt(settingsDarkModeKey, DEFAULT)
+        val saved = sharedPref.getInt(settingsDarkModeKey, keyDEFAULT)
         return DarkMode.values()[saved]
     }
 

@@ -12,7 +12,7 @@ class AudioManager(context: Context) {
         .setUsage(AudioAttributes.USAGE_GAME)
         .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
         .build()
-    var soundPool: SoundPool? = SoundPool.Builder()
+    private var soundPool: SoundPool? = SoundPool.Builder()
         .setAudioAttributes(attributes)
         .build()
 
